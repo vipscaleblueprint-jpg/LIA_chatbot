@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+faq_data_cleaning/clean_faqs.js
+faq_data_cleaning/clean_faqs.py
+faq_data_cleaning/clean_raw_chat.py
+faq_data_cleaning/cleaned_faq_data.csv
+faq_data_cleaning/faq_frequency_summary.csv
+faq_data_cleaning/frequent_questions_categorized.csv
+faq_data_cleaning/raw_chat_messages_dump.csv
+faq_data_cleaning/run_clean.mjs
+faq_data_cleaning/top20_frequent_questions_summary.csv
+faq_data_cleaning/clean_faq_questions.py

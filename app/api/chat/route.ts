@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { retrieveContext } from "@/lib/rag";
 import { askLLM } from "@/lib/llm";
 import { getTopic, setTopic } from "@/lib/chatMemory";
+import { classifyQuestion } from "@/lib/classifier";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,82 +11,107 @@ export async function POST(req: Request) {
   try {
     const { message } = await req.json();
 
+    if (!message || typeof message !== "string") {
+      return NextResponse.json({ error: "Invalid message" }, { status: 400 });
+    }
+
     const sessionId =
       req.headers.get("x-forwarded-for") ||
       req.headers.get("x-real-ip") ||
       "local";
 
-    /* LOAD MEMORY */
+    /* 1. CLASSIFY QUESTION CATEGORY & INTENT */
+    const classification = classifyQuestion(message);
+
+    /* 2. LOAD MEMORY & QUERY ENHANCEMENT */
     const lastTopic = getTopic(sessionId);
+    const enhancedQuery = `${message} ${classification.intent} ${lastTopic || ""}`.trim();
 
-    /* 1. QUERY ENHANCEMENT (Internal Rephrasing) */
-    // Instead of calling LLM twice (slow), we do a multi-word search by splitting phrases
-    const enhancedQuery = `${message} ${lastTopic || ""}`.trim();
-
-    /* 2. DUAL RETRIEVAL */
+    /* 3. DUAL RETRIEVAL WITH RAG */
     let { context, detectedTopic } = retrieveContext(enhancedQuery);
 
-    /* 3. SOCIAL/FALLBACK CHECK */
+    /* 4. SOCIAL/FALLBACK CHECK */
     if (context === "NO_CONTEXT_FOUND") {
       const socialPhrases = ["hi", "hello", "hey", "kamusta", "kumusta", "thanks", "thank you", "salamat", "thankyou", "magandang", "umaga", "hapon", "gabi"];
       const lowerMsg = message.toLowerCase();
       const isSocial = socialPhrases.some(p => lowerMsg.includes(p));
-      
+
       if (isSocial) {
         if (lowerMsg.includes("thank") || lowerMsg.includes("salamat")) {
-          return NextResponse.json({ reply: "Walang anuman po! Always happy to help." });
+          return NextResponse.json({
+            reply: `📌 **Kategorya:** ${classification.icon} ${classification.category} — *${classification.intent}*\n\nWalang anuman po! Always happy to help po.`,
+            category: classification.category,
+            intent: classification.intent,
+            icon: classification.icon,
+            model: "Ollama (llama3.1:8b)"
+          });
         }
-        return NextResponse.json({ reply: "Hello po! I'm Lia Satella. May itatanong po ba kayo about Xfinite? Handa po akong sumagot sa inyong mga katanungan." });
+        return NextResponse.json({
+          reply: `📌 **Kategorya:** ${classification.icon} ${classification.category} — *${classification.intent}*\n\nHello po! I'm Lia Satella, inyong Xfnite community moderator. May maitutulong po ba ako tungkol sa Ginger software, training modules, o payouts?`,
+          category: classification.category,
+          intent: classification.intent,
+          icon: classification.icon,
+          model: "Ollama (llama3.1:8b)"
+        });
       }
 
-      return NextResponse.json({ reply: "Pasensya na po, wala sa record ko ang information na yan. Baka gusto niyo magtanong about Xfinite project, requirements, or payments?" });
+      return NextResponse.json({
+        reply: `📌 **Kategorya:** ${classification.icon} ${classification.category} — *${classification.intent}*\n\nPasensya na po, wala pa sa aking opisyal na record ang specific information na yan. Baka gusto niyo pong magtanong tungkol sa Ginger setup, requirements, active projects, o sahod?`,
+        category: classification.category,
+        intent: classification.intent,
+        icon: classification.icon,
+        model: "Ollama (llama3.1:8b)"
+      });
     }
 
     /* SAVE TOPIC */
-    if (detectedTopic) setTopic(sessionId, detectedTopic as string);
+    if (detectedTopic) {
+      setTopic(sessionId, detectedTopic as string);
+    } else if (classification.intent) {
+      setTopic(sessionId, classification.intent);
+    }
 
-    /* 4. FINAL LLM GENERATION */
-    const prompt = `
-You are Lia Satella, a helpful and polite community moderator for Xfinite. 
+    /* 5. PROMPT GENERATION FOR OLLAMA */
+    const prompt = `Ikaw si Lia Satella, ang magalang at maaasahang community moderator ng Xfinite.
+[KATEGORYA]: ${classification.category} - ${classification.intent}
 
-[GOAL]
-Answer the user's question directly and CONFIDENTLY using the provided Context. 
-If the information is in the Context, do NOT apologize or say "I think". Just provide the answer.
+[PANUNTUNAN]:
+- Sumagot nang direkta at magalang gamit ang natural na Taglish (may "po" at "opo").
+- LIMITAHAN SA 1 O 2 PANGUNGUSAP LAMANG: Huwag humaba nang higit sa 35 words para mabilis mag-generate.
+- Gamitin ang ibinigay na Context sa ibaba para sa iyong sagot.
 
-[TONE & STYLE]
-- Friendly Ate/Kuya vibe but GET STRAIGHT TO THE POINT.
-- Language: Natural Taglish (Filipino-English mix).
-- Always use "po" and "opo" to remain polite.
-- Avoid being "robotic" by using natural fillers.
-- IMPORTANT: DO NOT say "Pasensya na po" unless you are 100% sure the information is missing from the Context.
-
-[STRICT RESPONSE RULES]
-- ONLY answer what is specifically asked. 
-- DO NOT dump irrelevant info.
-- NO BOLD: Never use ** or __.
-- FORMATTING: Plain text only. 
-
-[ACCOUNT/REGISTRATION RULE]
-- For account issues: Simply state that passing the Precourse Exam is the only way to get an account, and to message Cedrick for follow-ups.
-
-[FALLBACK]
-- If and ONLY IF the info is NOT in context: "Pasensya na po, wala pa po kasi sa records ko yung info na yan."
-
-CONTEXT:
+[CONTEXT]:
 ${context}
 
-QUESTION:
+[TANONG]:
 ${message}
 `;
 
+    /* 6. CALL OLLAMA VIA N8N WEBHOOK */
+    const llmRes = await askLLM(prompt);
 
+    // If Ollama timed out (Cloudflare 100s limit), gracefully provide verified context answer
+    let answerText = llmRes.reply;
+    if (answerText.includes("temporary connection issue") && context && context !== "NO_CONTEXT_FOUND") {
+      const firstLine = context.split("\n")[0];
+      const colonIndex = firstLine.indexOf(":");
+      const directAnswer = colonIndex !== -1 ? firstLine.slice(colonIndex + 1).trim() : firstLine;
+      answerText = directAnswer;
+    }
 
-    const reply = await askLLM(prompt);
+    // Format final response to explicitly tell user the identified category
+    const finalReply = `📌 **Kategorya:** ${classification.icon} **${classification.category}** — *${classification.intent}*\n\n${answerText}`;
 
-    return NextResponse.json({ reply });
+    return NextResponse.json({
+      reply: finalReply,
+      category: classification.category,
+      intent: classification.intent,
+      icon: classification.icon,
+      model: llmRes.model
+    });
 
-  } catch (err) { 
-    console.error(err);
-    return NextResponse.json({ error: "Server crashed" }, { status: 500 });
+  } catch (err) {
+    console.error("Chat API route error:", err);
+    return NextResponse.json({ error: "Server error occurred" }, { status: 500 });
   }
-}
+}

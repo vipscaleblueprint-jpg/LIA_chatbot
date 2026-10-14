@@ -10,7 +10,20 @@ type Msg = {
   role: "user" | "assistant";
   text: string;
   timestamp: Date;
+  category?: string;
+  intent?: string;
+  icon?: string;
+  model?: string;
 };
+
+const SUGGESTIONS = [
+  { text: "Bakit po download failed ang auto-update sa Ginger?", label: "🛠️ Ginger Update" },
+  { text: "Kailan po ang next cut-off at release ng sahod?", label: "💰 Sahod & Cut-off" },
+  { text: "Pwede po ba ipagpatuloy bukas ang training kung gabi na?", label: "🎓 Pwede Bukas?" },
+  { text: "Saan ko po makikita ang aking Labeler ID?", label: "🔑 Labeler ID" },
+  { text: "Puwede ko ba i-download ang Ginger sa cellphone ko?", label: "📱 CP Ginger" },
+  { text: "Kailan po magkakaroon ng Checker para sa training task?", label: "📋 Checker Schedule" },
+];
 
 export default function Home() {
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -49,7 +62,7 @@ export default function Home() {
     }
   }, [messages, isHydrated]);
 
-  // auto scroll to bottom when new messages appear
+  // Auto scroll to bottom when new messages appear
   useEffect(() => {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
@@ -62,15 +75,13 @@ export default function Home() {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  async function triggerSendMessage(textToSend: string) {
+    if (!textToSend.trim() || botStatus !== "idle") return;
 
-
-  async function sendMessage() {
-    if (!input.trim() || botStatus !== "idle") return;
-
-    const userText = input;
+    const userText = textToSend;
     const userMsgId = Math.random().toString(36).substring(7);
     setInput("");
-    
+
     const newUserMsg: Msg = { 
       id: userMsgId,
       role: "user", 
@@ -80,33 +91,21 @@ export default function Home() {
 
     setMessages(prev => [...prev, newUserMsg]);
     setLastMessageSeen(false);
-    
-    const now = Date.now();
-    const timeSinceLastLiaMsg = now - lastReplyAt;
-    const isLiveConversation = lastReplyAt !== 0 && timeSinceLastLiaMsg < 120000; // 2 minute "live" window
 
-    const baseWaitMin = isLiveConversation ? 3000 : 10000;
-    const baseWaitMax = isLiveConversation ? 7000 : 30000;
-    const analyzeTime = isLiveConversation ? 1500 : 4000;
-
-    // PHASE 1: BEFORE SEEN (Delivered status)
+    // Natural responsive pacing
     setBotStatus("waiting");
-    const waitTime = Math.floor(Math.random() * (baseWaitMax - baseWaitMin + 1)) + baseWaitMin;
-    await sleep(waitTime);
-    
-    // PHASE 2: SEEN NOTICE & ANALYZE
+    await sleep(600);
+
     setLastMessageSeen(true);
     setBotStatus("analyzing");
-    
-    // Start fetching while "analyzing" to be ready
+
     const apiPromise = fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: userText }),
     });
 
-    await sleep(analyzeTime);
-    
+    await sleep(800);
     setBotStatus("typing");
 
     try {
@@ -129,15 +128,22 @@ export default function Home() {
 
       const data = await res.json();
       const reply = data.reply ?? `❌ ERROR: Memory corruption.`;
+      const category = data.category;
+      const intent = data.intent;
+      const icon = data.icon;
+      const model = data.model;
 
-      const typingTime = Math.min(reply.length * 15, 2000); 
-      await sleep(typingTime);
+      await sleep(500);
 
       setMessages(prev => [...prev, { 
         id: Math.random().toString(36).substring(7),
         role: "assistant", 
         text: reply,
-        timestamp: new Date()
+        timestamp: new Date(),
+        category,
+        intent,
+        icon,
+        model
       }]);
       setLastReplyAt(Date.now());
 
@@ -158,62 +164,82 @@ export default function Home() {
   }
 
   function handleKey(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") sendMessage();
+    if (e.key === "Enter") {
+      triggerSendMessage(input);
+    }
   }
 
   return (
-    <div className="h-screen bg-[#050505] text-white flex flex-col font-sans selection:bg-neon/30 relative overflow-hidden">
+    <div className="flex flex-col h-screen bg-[#111111] text-[#e0e0e0] font-sans antialiased select-none">
       
-      {/* SCANLINE EFFECT */}
-      <div className="scanline pointer-events-none opacity-20" />
-      
-      {/* HEADER */}
-      <div className="sticky top-0 z-20 border-b border-white/5 backdrop-blur-md bg-black/80">
-        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 shadow-lg">
-              <Image 
-                src="/icon/via.png" 
-                alt="VIA Icon" 
-                fill
-                className="object-cover"
-              />
+      {/* TOP BAR / HEADER */}
+      <div className="h-16 border-b border-white/5 bg-[#141414] px-6 flex items-center justify-between z-10">
+        <div className="flex items-center gap-3">
+          <div className="relative w-9 h-9 rounded-full overflow-hidden border border-white/10 shadow-sm">
+            <Image 
+              src="/icon/via.png" 
+              fill
+              className="object-cover"
+              alt="Lia Avatar"
+            />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-white tracking-wide text-sm">Lia Satella</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
             </div>
-            <div>
-              <h1 className="text-lg tracking-tight text-white">Lia Satella</h1>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 bg-neon rounded-full shadow-[0_0_8px_#39ff14]" />
-                <span className="text-[10px] text-white/50 font-normal tracking-wider">Active now</span>
-              </div>
+            <div className="text-[11px] text-white/50 flex items-center gap-1">
+              <span>Community Moderator</span>
+              <span>&bull;</span>
+              <span className="text-emerald-400/80 font-medium">Online &bull; Ollama (llama3.1:8b)</span>
             </div>
           </div>
-
         </div>
+
+        <button
+          onClick={() => {
+            sessionStorage.removeItem("lia_chat_history");
+            setMessages([]);
+          }}
+          className="text-xs text-white/40 hover:text-white/80 transition-colors bg-white/5 px-3 py-1.5 rounded-lg border border-white/5 hover:border-white/10"
+        >
+          Clear Chat
+        </button>
       </div>
 
-      {/* CHAT AREA */}
-      <div className="flex-1 overflow-y-auto scroll-smooth relative px-4 md:px-0">
-        {/* Subtle background grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(57,255,20,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(57,255,20,0.03)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
-        
-        <div className="max-w-3xl mx-auto py-8 relative z-10">
+      {/* MESSAGES SCROLL AREA */}
+      <div className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="max-w-3xl mx-auto flex flex-col justify-end min-h-full">
 
           {messages.length === 0 && (
-            <div className="text-center pt-20 flex flex-col items-center">
-              <div className="relative w-24 h-24 mb-6 rounded-full overflow-hidden border-2 border-white/10 shadow-2xl">
+            <div className="text-center pt-8 pb-4 flex flex-col items-center">
+              <div className="relative w-20 h-20 mb-4 rounded-full overflow-hidden border-2 border-white/10 shadow-2xl">
                 <Image 
                   src="/icon/via.png" 
                   fill
                   className="object-cover"
-                  alt="VIA Logo"
+                  alt="Lia Satella"
                 />
               </div>
-              <h2 className="text-2xl mb-1 text-white">Lia Satella</h2>
-              <p className="text-sm text-white/40 mb-8 uppercase tracking-widest text-[10px]">Xfinite Team Manager</p>
-              <div className="bg-white/5 rounded-2xl p-6 border border-white/10 max-w-xs">
-                <p className="text-xs text-white/60 leading-relaxed italic">
-                  &quot;I&apos;m here to help you with your Xfinite journey po! Tanong lang kayo anytime.&quot;
+              <h2 className="text-xl font-semibold mb-1 text-white">Lia Satella</h2>
+              <p className="text-xs text-white/40 mb-6 uppercase tracking-widest">Xfinite AI Support & Community Moderator</p>
+              <div className="bg-white/5 rounded-2xl p-5 border border-white/10 max-w-sm mb-6">
+                <p className="text-xs text-white/70 leading-relaxed italic">
+                  &quot;Hello po! Handa po akong sumagot sa mga tanong ninyo tungkol sa Ginger app, training, payouts, at accounts. Pumili ng topic sa ibaba o mag-type ng inyong tanong!&quot;
                 </p>
+              </div>
+
+              {/* QUICK CHIPS */}
+              <div className="flex flex-wrap justify-center gap-2 max-w-md">
+                {SUGGESTIONS.map((s, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => triggerSendMessage(s.text)}
+                    className="text-xs bg-white/5 hover:bg-white/10 text-white/80 hover:text-white px-3 py-1.5 rounded-full border border-white/10 transition-all hover:scale-105 active:scale-95"
+                  >
+                    {s.label}
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -226,9 +252,9 @@ export default function Home() {
               return (
                 <div key={m.id} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
                   
-                  {/* DATE SEPARATOR (Mock logic) */}
+                  {/* DATE SEPARATOR */}
                   {(i === 0 || m.timestamp.getDate() !== messages[i-1].timestamp.getDate()) && (
-                    <div className="w-full text-center my-6">
+                    <div className="w-full text-center my-4">
                       <span className="text-[10px] text-white/30 uppercase tracking-[0.2em]">
                         {m.timestamp.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
@@ -245,18 +271,34 @@ export default function Home() {
                     )}
 
                     <div className="flex flex-col">
+                      {/* CATEGORY & INTENT BADGE (Only for Assistant replies) */}
+                      {m.role === "assistant" && m.category && (
+                        <div className="flex items-center gap-1.5 mb-1.5 text-[11px] font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full w-fit">
+                          <span>{m.icon || "📌"}</span>
+                          <span>{m.category}</span>
+                          {m.intent && <span className="text-white/40 font-normal">&bull; {m.intent}</span>}
+                          {m.model && <span className="text-[9px] text-white/30 ml-1">({m.model})</span>}
+                        </div>
+                      )}
+
                       <div
                         className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed shadow-sm
                         ${
                           m.role === "user"
-                            ? "bg-neon text-black rounded-tr-sm"
-                            : "bg-[#262626] text-white/90 rounded-tl-sm"
+                            ? "bg-neon text-black rounded-tr-sm font-medium"
+                            : "bg-[#242424] text-white/90 rounded-tl-sm border border-white/5"
                         }`}
                       >
-                        {m.role === "assistant" ? <div className="prose prose-invert prose-sm"><ReactMarkdown>{m.text}</ReactMarkdown></div> : m.text}
+                        {m.role === "assistant" ? (
+                          <div className="prose prose-invert prose-sm">
+                            <ReactMarkdown>{m.text}</ReactMarkdown>
+                          </div>
+                        ) : (
+                          m.text
+                        )}
                       </div>
                       
-                      {/* TIMESTAMP UNDER MESSAGE (Only if last in group or shows after 5 mins) */}
+                      {/* TIMESTAMP */}
                       {isLastInGroup && (
                         <span className={`text-[9px] text-white/30 mt-1 ${m.role === "user" ? "text-right" : "text-left ml-1"}`}>
                           {formatTime(m.timestamp)}
@@ -264,8 +306,8 @@ export default function Home() {
                       )}
                     </div>
                   </div>
-  {/* MESSENGER STYLE STATUS INDICATORS */}
-                  {/* MESSENGER STYLE STATUS INDICATORS */}
+
+                  {/* STATUS INDICATORS */}
                   {isLastUserMsg && (
                     <div className="mt-1 mr-1 flex flex-col items-end">
                       {lastMessageSeen ? (
@@ -289,7 +331,7 @@ export default function Home() {
                 <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 border border-white/10 mb-1">
                   <Image src="/icon/via.png" alt="Lia" width={28} height={28} className="object-cover" />
                 </div>
-                <div className="bg-[#262626] rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1 items-center">
+                <div className="bg-[#242424] rounded-2xl rounded-tl-sm px-4 py-3 flex gap-1 items-center border border-white/5">
                   <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce" />
                   <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce [animation-delay:0.2s]" />
                   <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce [animation-delay:0.4s]" />
@@ -298,33 +340,55 @@ export default function Home() {
             )}
           </div>
 
-          <div ref={bottomRef} className="h-10" />
+          <div ref={bottomRef} className="h-6" />
         </div>
       </div>
 
-      {/* INPUT AREA (Messenger Style) */}
-      <div className="p-4 bg-black border-t border-white/5">
-        <div className="max-w-4xl mx-auto flex items-center gap-3">
+      {/* QUICK CHIP SUGGESTIONS BAR (When chat has messages) */}
+      {messages.length > 0 && (
+        <div className="bg-[#141414] border-t border-white/5 px-4 py-2 overflow-x-auto">
+          <div className="max-w-3xl mx-auto flex items-center gap-2">
+            <span className="text-[10px] text-white/30 uppercase tracking-wider shrink-0">Topics:</span>
+            {SUGGESTIONS.slice(0, 4).map((s, idx) => (
+              <button
+                key={idx}
+                onClick={() => triggerSendMessage(s.text)}
+                disabled={botStatus !== "idle"}
+                className="text-[11px] bg-white/5 hover:bg-white/10 text-white/70 hover:text-white px-2.5 py-1 rounded-full border border-white/5 whitespace-nowrap transition-colors"
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* INPUT AREA */}
+      <div className="p-4 bg-[#141414] border-t border-white/5">
+        <div className="max-w-3xl mx-auto flex items-center gap-3">
           
-          {/* PILL INPUT */}
           <div className="flex-1 relative flex items-center">
             <input
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKey}
-              placeholder="Chat with me"
-              className="w-full bg-[#262626] text-white rounded-full py-2.5 px-6 outline-none border-none text-[15px] placeholder:text-white/30"
+              placeholder="Magtanong kay Lia (hal. Paano mag-update sa Ginger?)..."
+              disabled={botStatus !== "idle"}
+              className="w-full bg-[#242424] text-white rounded-full py-2.5 px-6 outline-none border border-white/5 focus:border-white/20 text-[14px] placeholder:text-white/30"
             />
           </div>
 
-          {/* SEND ICON (AIRPLANE NEON) */}
           <button
-            onClick={sendMessage}
+            onClick={() => triggerSendMessage(input)}
             disabled={botStatus !== "idle" || !input.trim()}
-            className={`transition-all duration-200 ${botStatus !== "idle" || !input.trim() ? "opacity-20 translate-x-1" : "text-neon hover:scale-110 active:scale-95 translate-x-0"}`}
+            className={`transition-all duration-200 p-2 rounded-full ${
+              botStatus !== "idle" || !input.trim() 
+                ? "opacity-20 text-white/30" 
+                : "text-neon hover:scale-110 active:scale-95"
+            }`}
           >
             <svg 
-              className="w-7 h-7 transform rotate-12" 
+              className="w-6 h-6 transform rotate-12" 
               fill="currentColor" 
               viewBox="0 0 24 24"
             >

@@ -166,7 +166,7 @@ export function retrieveContext(query: string, forcedTopic?: string) {
     }))
     .filter(r => r.score > 2) // Minimum relevance threshold
     .sort((a, b) => b.score - a.score)
-    .slice(0, 7); // Retrieve top 7 items
+    .slice(0, 2); // Retrieve top 2 focused items to prevent CPU timeout
 
   if (!ranked.length) {
     // Fallback: If no matches, try loose token matching on title only
