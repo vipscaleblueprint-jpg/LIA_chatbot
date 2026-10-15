@@ -102,7 +102,7 @@ export default function Home() {
     const apiPromise = fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: userText }),
+      body: JSON.stringify({ message: userText, history: messages.slice(-8).map(m => ({ role: m.role, text: m.text })) }),
     });
 
     await sleep(analyzeTime);

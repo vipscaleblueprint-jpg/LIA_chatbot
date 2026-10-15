@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local data & tooling (not used by the app)
+# raw chat exports contain members' names and emails; curated answers live in app/data/team_answers.json
+/faq_data_cleaning/
+# n8n workflow export: webhook URL and pinned request data
+/n8n-conn.json
+# Claude Code local settings
+/.claude/
