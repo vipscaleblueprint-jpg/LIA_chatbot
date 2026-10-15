@@ -1,4 +1,5 @@
-export async function askLLM(prompt: string): Promise<string> {
+// Returns null when the model couldn't answer (n8n timeout/error), so the caller decides what Lia says
+export async function askLLM(prompt: string): Promise<string | null> {
   try {
     const webhookUrl = "https://n8n.heysnaply.com/webhook/101ed314-1e34-4b9b-a0e7-2bfafc9300f5";
 
@@ -17,7 +18,7 @@ export async function askLLM(prompt: string): Promise<string> {
     if (!res.ok) {
       console.error("N8N ERROR STATUS:", res.status);
       console.error("N8N RAW ERROR:", text);
-      return "Ay sorry po, medyo nag-lag yung connection ko. Pwede pa-send ulit yung message niyo?";
+      return null;
     }
 
     try {
@@ -50,6 +51,6 @@ export async function askLLM(prompt: string): Promise<string> {
     }
   } catch (err) {
     console.error("LLM CRASH:", err);
-    return "Ay sorry po, medyo nag-lag yung connection ko. Pwede pa-send ulit yung message niyo?";
+    return null;
   }
 }

@@ -10,7 +10,8 @@ export const dynamic = "force-dynamic";
 
 type Turn = { role: "user" | "assistant"; text: string };
 
-const HISTORY_TURNS = 8;
+// Kept small on purpose: the n8n model is slow and times out on long prompts
+const HISTORY_TURNS = 6;
 
 // Only trust well-formed, recent turns from the client
 function cleanHistory(raw: unknown): Turn[] {
@@ -21,7 +22,7 @@ function cleanHistory(raw: unknown): Turn[] {
       (t.role === "user" || t.role === "assistant") &&
       typeof t.text === "string")
     .slice(-HISTORY_TURNS)
-    .map(t => ({ role: t.role, text: t.text.slice(0, 600) }));
+    .map(t => ({ role: t.role, text: t.text.slice(0, 300) }));
 }
 
 /* ================= PERSISTENCE ================= */
@@ -39,7 +40,8 @@ function keyWords(text: string) {
 }
 
 function isPersisting(message: string, turns: Turn[]) {
-  const lastLia = [...turns].reverse().find(t => t.role === "assistant")?.text ?? "";
+  // Skip "connection lag" messages: they mention Cedrick but aren't a real redirect
+  const lastLia = [...turns].reverse().find(t => t.role === "assistant" && !ALL_LAG.has(t.text))?.text ?? "";
   const lastUser = [...turns].reverse().find(t => t.role === "user")?.text ?? "";
   if (!/cedrick/i.test(lastLia)) return false; // she hasn't redirected them yet
 
@@ -68,6 +70,48 @@ function trimKamusta(reply: string, message: string, turns: Turn[]) {
   return kept.length ? kept.join(" ").trim() : reply;
 }
 
+/* ================= WHEN THE MODEL IS DOWN ================= */
+// n8n sometimes times out. Don't repeat one fixed line: pick a message she hasn't just used,
+// and if it keeps failing, change tack instead of asking them to resend again and again.
+
+const LAG_MESSAGES = [
+  "Ay sorry po, medyo bumagal yung connection ko. Pa-send po ulit?",
+  "Hala, na-cut po yung reply ko. Pwede pakiulit yung tanong niyo?",
+  "Sorry po, nag-hang ako saglit. Ano nga po ulit yung tanong niyo?",
+  "Pasensya na po, medyo mabagal yung system ngayon. Try niyo po ulit in a bit?",
+];
+const LAG_STREAK_MESSAGES = [
+  "Sorry po talaga, mukhang mabagal yung system ko ngayon. Habang inaayos pa, pwede niyo rin i-message si Cedrick or yung recruiter niyo para mas mabilis kayong matulungan.",
+  "Pasensya na po, ayaw talaga mag-load ng reply ko ngayon. Kung urgent po, i-message niyo muna si Cedrick or yung TM niyo, tapos balikan niyo lang ako mamaya.",
+];
+const ALL_LAG = new Set([...LAG_MESSAGES, ...LAG_STREAK_MESSAGES]);
+
+function lagReply(turns: Turn[]) {
+  const liaTurns = turns.filter(t => t.role === "assistant").map(t => t.text);
+  const recent = new Set(liaTurns.slice(-3));
+  const streak = liaTurns.length > 0 && ALL_LAG.has(liaTurns[liaTurns.length - 1]);
+  const pool = (streak ? LAG_STREAK_MESSAGES : LAG_MESSAGES).filter(m => !recent.has(m));
+  const fresh = LAG_MESSAGES.filter(m => !recent.has(m));
+  const options = pool.length ? pool : fresh.length ? fresh : LAG_MESSAGES;
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+// Lia must never point users to things only she can see in her prompt
+const PROMPT_LEAK = /\b(context|team answers?|platform guide|knowledge base|database)\b/i;
+
+function scrubLeaks(reply: string) {
+  const kept = reply.split(/(?<=[.!?])\s+/).filter(s => !PROMPT_LEAK.test(s));
+  return kept.length ? kept.join(" ").trim() : reply;
+}
+
+// Single exit for every model reply
+function finish(raw: string | null, message: string, turns: Turn[], opts: { cedrick?: boolean } = {}) {
+  if (!raw || !raw.trim()) return NextResponse.json({ reply: lagReply(turns) });
+  let reply = scrubLeaks(raw);
+  if (opts.cedrick) reply = ensureCedrick(reply);
+  return NextResponse.json({ reply: trimKamusta(reply, message, turns) });
+}
+
 function historyBlock(turns: Turn[]) {
   if (!turns.length) return "(This is the start of the conversation.)";
   return turns.map(t => `${t.role === "user" ? "User" : "Lia"}: ${t.text}`).join("\n");
@@ -75,55 +119,32 @@ function historyBlock(turns: Turn[]) {
 
 /* ================= SHARED PERSONA ================= */
 
+// Kept compact on purpose: every extra token slows the n8n model and risks a timeout.
 const PERSONA = `
 [WHO YOU ARE]
-You are Lia Satella, part of the Xfinite team (team manager / community moderator).
-You chat like a real Filipino coworker on Messenger: warm, kind, patient, a little playful, never robotic.
-- You are on the SAME side as the person you're talking to. Never talk as "kami/namin" (the company) versus "kayo" (the members); say "yung cut-off" not "yung cut-off namin". Use "tayo" when talking about the team or the work.
-- Never imply that members are lazy, slow, or a bother, and never say the team is "too busy" for them.
-- NEVER invent Xfinite facts, problems, events, dates, or schedules.
-- If someone sincerely asks if you're a bot, AI, or a real person, be honest in a casual way: you're Lia, the virtual assistant of the Xfinite team, and you're here to help. Don't pretend to be human. Then keep chatting naturally.
+Lia Satella of the Xfinite team, chatting 1-on-1 on Messenger like a warm, patient Filipino coworker.
+- You're on the member's side: say "tayo", never "kami/namin" vs "kayo". Never imply they're lazy or a bother.
+- Never invent facts, problems, dates, or schedules.
+- If sincerely asked if you're a bot/AI, say casually you're Lia, the Xfinite team's virtual assistant. Don't pretend to be human.
 
-[NEVER SOUND LIKE A BOT]
-- NEVER say things that reveal you're reading from data: "wala sa info ko", "wala sa records ko", "based sa info ko", "according to the context", "sa database", "I don't have information", "hindi ko alam yan kasi wala sa data ko".
-- No side comments in parentheses like "(Tayong magtanong pa...)". Just talk normally.
-- Cedrick, recruiters, TMs, and judgers are real people, your teammates. Talk about them like people ("siya po makakasagot nyan", "siya po makakatulong sa inyo"), never like a system or source ("may latest update", "may data", "updated info").
-- NEVER start with "Sorry po, wala..." and then answer anyway. If you know it, just say it.
-- You're chatting 1-on-1. Never talk to a crowd ("para sa mga nagtataka", "sa lahat ng nagtatanong", "guys").
+[SOUND HUMAN]
+- The user can't see your Context, Team Answers, or guide. Never mention them ("nasa Context", "check yung guide"). Give the actual steps yourself, with the exact place on the site ("sa sidebar, Onboarding").
+- Never say "wala sa info/records ko" or "according to the context". No side comments in parentheses.
+- Cedrick, recruiters, TMs, and judgers are people: "siya po makakasagot nyan", never "may latest update".
+- Mention Cedrick/recruiter/TM ONLY if you truly don't know, a team answer says to message someone, or they keep pushing. Never tack it onto an answer you know.
+- Don't assume a problem they didn't mention. If they ask HOW, just explain how.
+- Examples here are ideas, not scripts. Never copy them, never repeat a sentence you already said in the conversation, and vary how you start.
 
-[WHEN TO MENTION CEDRICK (OR A RECRUITER/TM)]
-- ONLY when: (a) you truly don't have the answer, (b) the guide or a team answer says to message someone, or (c) they keep pushing on something you can't answer.
-- NEVER in a normal answer you already know. Don't tack "para sure, i-message si Cedrick" onto a complete answer.
-- Never assume they have a problem they didn't mention. If they ask HOW to do something, just explain how. ("May alam po akong nag-e-experience ng problema..." is wrong.)
+[READ THE ROOM]
+- If they're reacting to your last message, respond to that. If offended: brief sorry, clarify, reassure. Never argue.
+- Acknowledge feelings before info. Don't push work when they're chatting, tired, or upset.
+- Match their length. Most replies end after the answer, with no extra question.
 
-[SOUND NATURAL, NOT SCRIPTED]
-- Every example in this prompt shows the IDEA only. NEVER copy an example word for word. Say it your own way, fresh every time.
-- NEVER repeat a sentence you already said in the CONVERSATION SO FAR. If you have to say the same point again, rephrase it and react to the fact that they asked again ("Ah, gets ko po na gusto niyo talaga malaman...").
-- Vary how you start. Don't open every reply with the same words ("Ah, kasi po", "Ay sorry po", "Para sure po").
-
-[EMPATHY: READ THE ROOM FIRST]
-- Read the CONVERSATION SO FAR. If the person is reacting to something you just said, respond to THAT, not to a new topic.
-- If they misunderstood you or got offended: say sorry briefly, clarify what you actually meant, and reassure them. Never repeat the thing that upset them, never argue.
-- Acknowledge feelings BEFORE giving info.
-- Don't push work ("trabahin na", "tuloy-tuloy lang") when they're just chatting, tired, or upset.
-- Match their energy and length: a short casual message gets a short 1-2 sentence reply.
-- Most replies should just END after the answer. Don't tack on a question. Real people don't ask "how are you" in every message.
-
-[TAGLISH: HOW YOU TALK]
-- Casual pero maayos, like a Manila professional on Messenger: roughly HALF English, half Tagalog. NOT textbook or "malalim" Filipino.
-- ENGLISH for most verbs and nouns: check, reach, update, wait, continue, send, make sure, once, until, don't worry, earnings, balance, salary, training, account, payout, tasks.
-- TAGALOG for the glue: po, lang, kasi, yung, na, pa, naman, niyo, din, siya, dun, tapos, Ay, Sige po.
-- One or two "po" per reply is enough. Short sentences. English in -> mostly English out.
-- Swap deep words: "naiipon" -> "naa-add"; "madagdagan" -> "tumaas"; "lalabas" -> "magsho-show"; "siguraduhin" -> "make sure"; "hintayin" -> "wait lang"; "susunod" -> "next"; "kinabukasan" -> "bukas"; "maaari" -> "pwede"; "katanungan" -> "tanong"; "ngunit" -> "pero"; "upang" -> "para"; "impormasyon" -> "info".
-- Every sentence must be COMPLETE and make sense. If a Tagalog sentence feels awkward, say it in English.
-- No unprofessional slang ("lodi", "petmalu", "charot", "beh", "sis", "bes").
-
-[CONSISTENCY]
-- Always address the user as "kayo / niyo / nyo". Never switch to "ka / mo".
-- Use "kasi" only to mean "because" ("kasi po kulang pa..."). Never stick it into a question.
-- Don't end replies with a random "Opo!" or filler. End naturally.
-- Plain, correctly spelled words only. If unsure of a Tagalog word, use the English word.
-- NO BOLD (never ** or __). Plain text only.
+[TAGLISH]
+- Casual pero maayos: about half English (verbs/nouns like check, reach, update, wait, make sure, earnings, balance, training, account) and half Tagalog glue (po, lang, kasi, yung, naman, niyo, tapos). Not "malalim".
+- Swap deep words: naiipon->naa-add, madagdagan->tumaas, siguraduhin->make sure, hintayin->wait lang, susunod->next, kinabukasan->bukas, maaari->pwede, katanungan->tanong, ngunit->pero.
+- 1-2 "po" per reply. Short, complete sentences; if Tagalog feels awkward, use English. No slang (lodi, charot, beh, sis).
+- Always "kayo/niyo", never "ka/mo". "kasi" only means "because". No random "Opo!" ending. Plain text, no bold.
 `;
 
 // Only for small talk / feelings. Kept out of FAQ answers so Lia doesn't open a salary
@@ -248,30 +269,29 @@ export async function POST(req: Request) {
     // they're pushing on the same thing -> she admits it plainly, in her own words.
     // Uses a prompt with no FAQ text so she can't drift into unrelated facts.
     if (isPersisting(message, turns)) {
-      const reply = await askLLM(unknownPrompt(message, turns, moodLine, true));
-      return NextResponse.json({ reply: trimKamusta(ensureCedrick(reply), message, turns) });
+      return finish(await askLLM(unknownPrompt(message, turns, moodLine, true)), message, turns, { cedrick: true });
     }
 
     /* 2A. CONVERSATIONAL PATH: small talk or feelings with no Xfinite topic */
     if (!category && (vibe.smallTalk || vibe.mood !== "neutral" || turns.length > 0)) {
-      const reply = await askLLM(chatPrompt(message, turns, moodLine));
-      return NextResponse.json({ reply: trimKamusta(reply, message, turns) });
+      return finish(await askLLM(chatPrompt(message, turns, moodLine)), message, turns);
     }
 
     /* 2B. FAQ PATH: official FAQ + real team answers from the same category */
     // With a playbook, skip the raw FAQ so amounts/thresholds never leak into the reply
-    const { context } = playbook ? { context: "NO_CONTEXT_FOUND" } : retrieveContext(message, category);
-    const teamAnswers = retrieveTeamAnswers(message, category);
+    // A vague follow-up ("nasaan yung guide?") has no topic words of its own, so search
+    // with the question it follows up on, or it matches random rows like "Guides button"
+    const query = !ownCategory && lastUserMsg ? `${lastUserMsg} ${message}` : message;
+    const { context } = playbook ? { context: "NO_CONTEXT_FOUND" } : retrieveContext(query, category);
+    const teamAnswers = retrieveTeamAnswers(query, category);
 
     if (!playbook && context === "NO_CONTEXT_FOUND" && !teamAnswers.length) {
       // Greetings and thanks are just conversation; anything else is a question she can't answer
       const isSocial = /\b(hi|hello|hey|kumusta|kamusta|musta|thank|thanks|salamat|ty)\b/i.test(message);
       if (isSocial) {
-        const reply = await askLLM(chatPrompt(message, turns, moodLine));
-        return NextResponse.json({ reply: trimKamusta(reply, message, turns) });
+        return finish(await askLLM(chatPrompt(message, turns, moodLine)), message, turns);
       }
-      const reply = await askLLM(unknownPrompt(message, turns, moodLine, false));
-      return NextResponse.json({ reply: trimKamusta(ensureCedrick(reply), message, turns) });
+      return finish(await askLLM(unknownPrompt(message, turns, moodLine, false)), message, turns, { cedrick: true });
     }
 
     const categoryLine = category
@@ -309,19 +329,13 @@ ${wantsSteps(message)
 - Keep it short. No headings, no "Here are the steps", no formal intro.
 - Use only the guide above for facts. Don't mention Cedrick or anyone to message unless the steps say so.
 ` : ""}
-[HOW TO ANSWER LIKE THE RECRUITERS]
-The Team Answers below are real replies from Xfinite recruiters, admins, and experienced members to similar questions.
-- Answer the way they do: short, direct, and tell the person exactly what to do or click next.
-- Use them for how-to steps and where to find things (website, Account Info, Wallet, Active Projects, Ginger).
-- For numbers, fees, dates, rates, and links, follow the official Context.
-- If they need a person to fix it (account disabled, user expired, no team yet), tell them who to message: recruiter, TM, or judger.
+[HOW TO ANSWER]
+- Answer like the recruiters in Team Answers: short, direct, telling them exactly what to do or click next.
+- Facts only from Context and Team Answers. "[Platform guide]" lines describe the CURRENT website and win over other lines; use their "Where" path to say where to click. Numbers, fees and links come from Context.
+- Only answer what was asked, in your own words. If you know it, just answer, no disclaimer first.
+- If someone needs a person to fix something (disabled account, user expired, no team), say who to message: recruiter, TM, or judger.
+- If the info really isn't there, don't guess: casually point them to Cedrick, in your own words.
 
-[STRICT RESPONSE RULES]
-- ONLY answer what is specifically asked. Don't dump irrelevant info.
-- Fill in facts ONLY from the Context and Team Answers; never add details that aren't there.
-- For account issues: passing the Precourse Exam is the only way to get an account; message Cedrick for follow-ups.
-- If the Context or Team Answers have the answer, JUST ANSWER. No apology or disclaimer first.
-- If they really don't have it, don't make anything up. Handle it like a teammate who isn't 100% sure: casually point them to Cedrick as the person who can answer, in your own words.
 CONTEXT (official FAQ):
 ${context === "NO_CONTEXT_FOUND" ? "None for this question." : context}
 
@@ -336,8 +350,7 @@ ${message}
 
 Lia's reply:`;
 
-    const reply = await askLLM(prompt);
-    return NextResponse.json({ reply: trimKamusta(reply, message, turns) });
+    return finish(await askLLM(prompt), message, turns);
 
   } catch (err) {
     console.error(err);

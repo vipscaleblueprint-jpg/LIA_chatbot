@@ -1,0 +1,1341 @@
+[
+  {
+    "id": "KB-001",
+    "category": "apply",
+    "topic": "Member journey overview",
+    "where": "xfnite.cloud (whole platform)",
+    "what_it_is": "The order a new member goes through: Register, Pre-Course Quiz, Onboarding (software setup, training videos, answer key), Standard Building Hands-on Training in Ginger, Rules & Guidelines, specialized trainings (Landcover, Transportation, Roof), then live projects and earnings in the Wallet.",
+    "how_to": [
+      "Register an account",
+      "Finish the Pre-Course Quiz",
+      "Complete every Onboarding step on the Dashboard",
+      "Get the Ginger ID and password from Account Info",
+      "Pass the Standard Building Hands-on Training in Ginger",
+      "Finish Rules & Guidelines under Projects",
+      "Take the required specialized trainings",
+      "Register for live projects and start earning"
+    ],
+    "conditions": "Each stage unlocks the next one. Projects and Wallet stay locked until Standard Building is passed.",
+    "keywords": [
+      "ano next",
+      "how to start",
+      "journey",
+      "next step",
+      "paano magsimula",
+      "process",
+      "sign up",
+      "steps",
+      "workflow"
+    ],
+    "source": "config/permissions.ts; dashboard/page.tsx; Project/RulesTab.tsx"
+  },
+  {
+    "id": "KB-002",
+    "category": "apply",
+    "topic": "Registering an account",
+    "where": "xfnite.cloud > Sign up (/register)",
+    "what_it_is": "The Create an Account form. Members sign up with their details or with Google. After signing up, the site shows the new Username and Password to copy and save.",
+    "how_to": [
+      "Open the Sign up page",
+      "Fill in First Name, Last Name, Email Address, Phone Number, Password, Confirm Password, Facebook Profile Link and Referrer",
+      "Agree to the Terms and Conditions and Privacy Policy, or click Continue with Google",
+      "Copy and save the Username and Password shown on the Registration Successful screen",
+      "Click Proceed to Pre-course"
+    ],
+    "conditions": "When registration is closed, the page shows 'Registration is Closed' and only existing accounts can log in.",
+    "keywords": [
+      "create account",
+      "gumawa ng account",
+      "mag sign up",
+      "referrer",
+      "register",
+      "registration closed",
+      "sign up",
+      "signup"
+    ],
+    "source": "components/Register/RegisterForm.tsx; components/Register/RegisterWizard.tsx"
+  },
+  {
+    "id": "KB-003",
+    "category": "account",
+    "topic": "Logging in",
+    "where": "xfnite.cloud > Sign In (/login)",
+    "what_it_is": "The Sign In page, using Email Address and Password or Continue with Google.",
+    "how_to": [
+      "Go to the Sign In page",
+      "Enter Email Address and Password, or click Continue with Google",
+      "Click Sign In"
+    ],
+    "conditions": "Accounts created with Google may be asked to complete their profile (name, Facebook link, phone, referrer, password) before continuing.",
+    "keywords": [
+      "complete profile",
+      "google login",
+      "hindi maka login",
+      "log in",
+      "login",
+      "sign in"
+    ],
+    "source": "app/login/page.tsx; components/CompleteProfile/CompleteProfileForm.tsx"
+  },
+  {
+    "id": "KB-004",
+    "category": "training",
+    "topic": "Pre-Course Quiz",
+    "where": "Shown right after registering (Pre-Course)",
+    "what_it_is": "A short quiz with videos and info slides about the Ginger labeling tools and the 3D guidelines. Finishing it creates the member's software accounts ('Creating Your Account').",
+    "how_to": [
+      "Watch each video and read each slide",
+      "Answer each question, then click Next",
+      "Finish every page; the system then sets up the software accounts"
+    ],
+    "conditions": "One wrong answer resets the quiz back to Page 1 ('Incorrect Answer! Quiz reset to Page 1'). Answering that there is no PC/laptop and WiFi ends the application. Videos have a countdown before Next unlocks. 'Reset Quiz & Video Progress' starts it over.",
+    "keywords": [
+      "bumalik sa page 1",
+      "exam",
+      "nag reset",
+      "not qualified",
+      "pre course",
+      "pre-course exam",
+      "precourse",
+      "quiz",
+      "reset quiz"
+    ],
+    "source": "components/PreCourse/PreCourseFlow.tsx; components/Onboarding/PreCourseSidebar.tsx"
+  },
+  {
+    "id": "KB-005",
+    "category": "legit_fees",
+    "topic": "Platform fees and benchmark rate",
+    "where": "Welcome to Xfnite pop-up (Agree & Continue)",
+    "what_it_is": "Xfnite has used platform and processing fees since 2017. The platform fee is 4% (development and maintenance). The processing fee is 12% plus a fixed $2 (payment handling costs and risks). Xfnite only pays for correctly completed work, and the benchmark rate can start lower while the system evaluates accuracy, then improve over time.",
+    "how_to": [
+      "Read the Welcome to Xfnite pop-up",
+      "Click Agree & Continue"
+    ],
+    "conditions": "There is no registration or activation fee. Fees are deducted from payouts.",
+    "keywords": [
+      "bakit mababa rate",
+      "benchmark",
+      "charges",
+      "deduct",
+      "fee",
+      "fees",
+      "kaltas",
+      "platform fee",
+      "processing fee",
+      "rate"
+    ],
+    "source": "components/WelcomeTermsModal.tsx"
+  },
+  {
+    "id": "KB-006",
+    "category": "training",
+    "topic": "Onboarding overview",
+    "where": "Sidebar > Onboarding (Dashboard: XFNITE Onboarding - Complete Your Training)",
+    "what_it_is": "The onboarding checklist on the Dashboard. It has five steps: Download Our Software, Install the Software, Basic Labeling videos, 3D & Multilayer guide, and the Answer Key. Overall Progress shows how many are done.",
+    "how_to": [
+      "Open Onboarding from the sidebar",
+      "Finish the steps in order",
+      "When it says Onboarding Complete, click Continue to Account Info"
+    ],
+    "conditions": "Steps unlock in order. Account Info stays locked until onboarding is complete ('Complete your onboarding to unlock your Account Info'). The live-session step is temporarily stopped and is skipped automatically.",
+    "keywords": [
+      "complete your training",
+      "dashboard",
+      "ilang module",
+      "locked",
+      "module",
+      "modules",
+      "naka lock",
+      "onboarding",
+      "progress"
+    ],
+    "source": "dashboard/page.tsx; components/Onboarding/useOnboardingProgress.ts; app/components/sidebar.tsx"
+  },
+  {
+    "id": "KB-007",
+    "category": "tech",
+    "topic": "Onboarding Step 1: Download Our Software",
+    "where": "Onboarding > Download Our Software",
+    "what_it_is": "Downloads all the software used in the Hands-on Training: 7-zip for Windows, VC-Redists, and Ginger Software.",
+    "how_to": [
+      "Download 7-zip for Windows",
+      "Download VC-Redists",
+      "Download Ginger Software"
+    ],
+    "conditions": "Ginger is for PC or laptop only (Windows). It does not run on a cellphone.",
+    "keywords": [
+      "7-zip",
+      "7zip",
+      "download",
+      "ginger download",
+      "saan download",
+      "software",
+      "vc redist",
+      "vc-redists"
+    ],
+    "source": "dashboard/page.tsx; useOnboardingProgress.ts"
+  },
+  {
+    "id": "KB-008",
+    "category": "tech",
+    "topic": "Onboarding Step 2: Install the Software",
+    "where": "Onboarding > Install the Software (Installation Checklist)",
+    "what_it_is": "A four-item installation checklist for 7-Zip, the Visual C runtimes, and Ginger.",
+    "how_to": [
+      "Install 7-Zip (7z2301-x64.exe)",
+      "Right-click Visual-C-Runtimes-All-in-One.zip > 7-Zip > Extract Here",
+      "Open the Visual-C-Runtimes-All-in-One folder and run install_all.bat, then wait for it to finish",
+      "Right-click Ginger.zip > 7-Zip > Extract Here",
+      "Tick each item, then click Mark as Done"
+    ],
+    "conditions": "Keep the extracted Ginger folder on Drive C to avoid errors.",
+    "keywords": [
+      "bat file",
+      "checklist",
+      "extract",
+      "install",
+      "install_all.bat",
+      "installation",
+      "paano mag install",
+      "visual c"
+    ],
+    "source": "components/Onboarding/useOnboardingProgress.ts; Onboarding/TrainingModuleCard.tsx"
+  },
+  {
+    "id": "KB-009",
+    "category": "training",
+    "topic": "Onboarding Step 3: Basic Labeling videos",
+    "where": "Onboarding > Watch Training Videos: Basic Labeling Guide",
+    "what_it_is": "Three videos to watch before the Hands-on Training: Part 1 Labeling Basics, Part 2 Techniques, Part 3 Switching.",
+    "how_to": [
+      "Play each video",
+      "Watch until the Next button unlocks",
+      "Move to the next part"
+    ],
+    "conditions": "Each video must be watched almost fully and its countdown must reach zero before moving on.",
+    "keywords": [
+      "basic labeling",
+      "panoorin",
+      "part 1",
+      "part 2",
+      "part 3",
+      "switching",
+      "techniques",
+      "video",
+      "videos"
+    ],
+    "source": "useOnboardingProgress.ts; dashboard/page.tsx"
+  },
+  {
+    "id": "KB-010",
+    "category": "training",
+    "topic": "Onboarding Step 4: 3D & Multilayer guide",
+    "where": "Onboarding > Watch Training Videos: 3D & Multilayer Guide",
+    "what_it_is": "Five 3D guide slides (Task Overview, Labeling the Footprint, Setting the Vector, Selecting the Label, Generating 3D Lines) plus two videos: How to Draw 3D Lines and 3D Overview.",
+    "how_to": [
+      "Read each 3D guide slide",
+      "Watch Part 2: How to Draw 3D Lines",
+      "Watch Part 3: 3D Overview"
+    ],
+    "conditions": "Slides and videos have a countdown before Next unlocks.",
+    "keywords": [
+      "3d",
+      "3d guide",
+      "3d lines",
+      "footprint",
+      "multilayer",
+      "vector"
+    ],
+    "source": "useOnboardingProgress.ts; Onboarding/TrainingModuleCard.tsx"
+  },
+  {
+    "id": "KB-011",
+    "category": "training",
+    "topic": "Video countdown and the Next button",
+    "where": "Onboarding and Pre-Course video pages",
+    "what_it_is": "The Next button shows a countdown while a video plays. It unlocks once the countdown reaches zero and the video is watched almost to the end.",
+    "how_to": [
+      "Click Play Video",
+      "Let the video play (skipping ahead does not count)",
+      "Click Finish Video or Next once it unlocks"
+    ],
+    "conditions": "The countdown is based on the video length. Rewinding or not finishing keeps Next locked.",
+    "keywords": [
+      "countdown",
+      "finish video",
+      "hindi ma click next",
+      "naka lock next",
+      "next button",
+      "play video",
+      "video stuck"
+    ],
+    "source": "dashboard/page.tsx; Onboarding/VideoCard.tsx; useOnboardingProgress.ts"
+  },
+  {
+    "id": "KB-012",
+    "category": "training",
+    "topic": "Onboarding Step 5: Answer Key",
+    "where": "Onboarding > Answer Key (then Answer Key Library)",
+    "what_it_is": "Answer key tasks that show how training tasks should be labeled, some with videos. After all are reviewed, the Answer Key Library stays available to search any task.",
+    "how_to": [
+      "Open each answer key task (Visited marks it)",
+      "Watch the task videos",
+      "Use Search tasks in the Answer Key Library for reference later"
+    ],
+    "conditions": "The Answer Key is locked until all earlier modules are complete. All 15 answer key tasks must be opened to finish this step.",
+    "keywords": [
+      "answer key",
+      "answer key library",
+      "locked answer key",
+      "reference",
+      "sagot sa task",
+      "susi"
+    ],
+    "source": "components/Onboarding/AnswerKeyPanel.tsx; useOnboardingProgress.ts"
+  },
+  {
+    "id": "KB-013",
+    "category": "account",
+    "topic": "Account Info page",
+    "where": "Sidebar > Account Info",
+    "what_it_is": "Shows the profile (Username, Default Role, Authority Level), Trainings Completed, Software Accounts (Ginger User ID and Password with copy buttons), and Group & Team Chat links.",
+    "how_to": [
+      "Open Account Info from the sidebar",
+      "Use Copy Username / Copy Password for the Ginger login",
+      "Click Refresh Software Accounts if the accounts do not show yet",
+      "Click Show Guide for the Ginger login guide"
+    ],
+    "conditions": "Locked until onboarding is complete.",
+    "keywords": [
+      "account info",
+      "ginger id",
+      "ginger password",
+      "login details",
+      "saan makikita password",
+      "software accounts",
+      "user id",
+      "username"
+    ],
+    "source": "app/(dashboard)/account/page.tsx"
+  },
+  {
+    "id": "KB-014",
+    "category": "account",
+    "topic": "Logging into Ginger",
+    "where": "Ginger desktop software (credentials from Account Info)",
+    "what_it_is": "Ginger is the desktop labeling software. Members log in with the Ginger ID and password from Account Info.",
+    "how_to": [
+      "Open ginger-202*.exe from the extracted Ginger folder",
+      "Choose Agree",
+      "Enter the Ginger ID and Password from Account Info",
+      "If Ginger asks to update, let it update, then restart Ginger"
+    ],
+    "conditions": "Ginger credentials appear only after onboarding is complete. Copy and paste them to avoid typing mistakes or extra spaces.",
+    "keywords": [
+      "ginger id",
+      "ginger login",
+      "ginger update",
+      "hindi maka login sa ginger",
+      "invalid password",
+      "log in ginger"
+    ],
+    "source": "app/(dashboard)/account/page.tsx"
+  },
+  {
+    "id": "KB-015",
+    "category": "tech",
+    "topic": "Ginger 2D and 3D versions",
+    "where": "Header > Download Software",
+    "what_it_is": "There are two Ginger versions. 2D Ginger is for Standard Building Repair, Landcover, Transportation and Centerline tasks. 3D Ginger is for 3D Matching and 3DR roof tasks.",
+    "how_to": [
+      "Click Download Software at the top of the page",
+      "Choose 2D or 3D Ginger based on the task",
+      "Extract it and move the folder to Drive C"
+    ],
+    "conditions": "The 3D version is a separate app with the same name in a different folder.",
+    "keywords": [
+      "2d",
+      "2d ginger",
+      "3d",
+      "3d ginger",
+      "download software",
+      "ginger version",
+      "roof software",
+      "which ginger"
+    ],
+    "source": "app/components/header.tsx"
+  },
+  {
+    "id": "KB-016",
+    "category": "tech",
+    "topic": "Ginger basic tools and shortcuts",
+    "where": "Ginger desktop software",
+    "what_it_is": "Common Ginger tools taught in the guides: Spacebar completes or connects a shape; the F tool draws right-angle lines; hovering a line and pressing 1 adds a point; hovering a point and pressing 2 deletes it; the Vector tool is key 3; X and Z are the repair tools; S, F, G and T tools can be switched while labeling.",
+    "how_to": [
+      "Draw the lines of the label",
+      "Before connecting the last point, press Spacebar to complete the shape",
+      "Switch tools while labeling as needed"
+    ],
+    "conditions": "The Rectangle Split tool is temporarily disabled; the guides show an alternative way.",
+    "keywords": [
+      "add point",
+      "delete point",
+      "hotkey",
+      "keyboard",
+      "line tool",
+      "repair tool",
+      "shortcut",
+      "spacebar",
+      "tool",
+      "tools"
+    ],
+    "source": "components/PreCourse/PreCourseFlow.tsx"
+  },
+  {
+    "id": "KB-017",
+    "category": "tech",
+    "topic": "3D labeling basics",
+    "where": "Ginger 3D tasks (3D & Multilayer guide)",
+    "what_it_is": "For 3D tasks, the label follows the building's ground footprint, not the triangular roof shape. Balconies count as part of the footprint. A building with a visible sidewall is a 3D building.",
+    "how_to": [
+      "Label the footprint of the house or building",
+      "Set the vector once per task (Vector tool or key 3): click an edge or sidewall, trace the angle, click again to set the end",
+      "Select the label",
+      "Hold CTRL and drag down until the yellow dashed 3D lines appear"
+    ],
+    "conditions": "Only one vector is needed per task; it applies to all features in that task.",
+    "keywords": [
+      "3d",
+      "3d building",
+      "ctrl drag",
+      "footprint",
+      "sidewall",
+      "vector",
+      "yellow lines"
+    ],
+    "source": "components/PreCourse/PreCourseFlow.tsx; Onboarding/TrainingModuleCard.tsx"
+  },
+  {
+    "id": "KB-018",
+    "category": "tasks",
+    "topic": "Returned tasks and checker comments",
+    "where": "Ginger desktop software",
+    "what_it_is": "A task with mistakes can be returned (pushed back) by a Checker with comments. Returned tasks do not appear in Ginger automatically.",
+    "how_to": [
+      "Download tasks regularly to receive returned tasks",
+      "Read the Checker comments",
+      "Fix all the errors",
+      "Resubmit the task"
+    ],
+    "conditions": "The training 'Congratulations' pop-up also only appears after downloading tasks again.",
+    "keywords": [
+      "binalik",
+      "checker comment",
+      "congratulations pop up",
+      "pop up",
+      "push back",
+      "pushback",
+      "resubmit",
+      "returned task"
+    ],
+    "source": "app/(dashboard)/account/page.tsx"
+  },
+  {
+    "id": "KB-019",
+    "category": "training",
+    "topic": "Standard Building Hands-on Training",
+    "where": "Ginger desktop software (shown in Projects > Training as Standard Building)",
+    "what_it_is": "The first hands-on training, done in Ginger after onboarding. Passing it unlocks Projects, Wallet, Attendance, and the Challengers chat lounge.",
+    "how_to": [
+      "Get the Ginger ID and password from Account Info",
+      "Open Ginger and download the training tasks",
+      "Label, submit, and fix any returned tasks until passed"
+    ],
+    "conditions": "Standard Building stays Ongoing until passed and has no Pause/Register button. Until it is passed the sidebar says 'Pass the Standard Building training in the desktop software to unlock Projects and Wallet'.",
+    "keywords": [
+      "hands on",
+      "hands-on training",
+      "naka lock projects",
+      "sb",
+      "standard building",
+      "unlock projects",
+      "unlock wallet"
+    ],
+    "source": "config/permissions.ts; app/components/sidebar.tsx; Project/ActiveProjectsTab.tsx"
+  },
+  {
+    "id": "KB-020",
+    "category": "platform",
+    "topic": "Locked pages and what unlocks them",
+    "where": "Sidebar",
+    "what_it_is": "Pages unlock as the member progresses. Account Info unlocks after onboarding. Projects and Wallet unlock after passing Standard Building. Leaderboard unlocks after Standard Building plus Rules & Guidelines. Attendance unlocks after Standard Building.",
+    "how_to": [
+      "Check the lock notice at the bottom of the sidebar",
+      "Finish the stage it mentions"
+    ],
+    "conditions": "Staff roles (checker, judger, recruiter, admin) are not locked.",
+    "keywords": [
+      "access",
+      "bakit locked",
+      "di ma click",
+      "hindi ma open",
+      "lock",
+      "locked",
+      "locked projects",
+      "locked wallet",
+      "naka lock",
+      "naka lock projects",
+      "naka lock wallet",
+      "unlock"
+    ],
+    "source": "config/permissions.ts; app/components/sidebar.tsx"
+  },
+  {
+    "id": "KB-021",
+    "category": "tasks",
+    "topic": "Projects section",
+    "where": "Sidebar > Projects",
+    "what_it_is": "The Projects hub with four tabs: Rules and Guidelines, Active Projects, Performance Query, and Overall Task Summary.",
+    "how_to": [
+      "Open Projects from the sidebar",
+      "Finish Rules and Guidelines first",
+      "Then use Active Projects, Performance Query and Task Summary"
+    ],
+    "conditions": "Active Projects and Task Summary are locked until Rules & Guidelines are acknowledged.",
+    "keywords": [
+      "active projects",
+      "project",
+      "project menu",
+      "projects",
+      "tabs"
+    ],
+    "source": "components/Project/ProjectSidebar.tsx; components/Project/SidebarProject.tsx"
+  },
+  {
+    "id": "KB-022",
+    "category": "training",
+    "topic": "Rules and Guidelines",
+    "where": "Projects > Rules and Guidelines",
+    "what_it_is": "A step-by-step lesson on the work rules: Task Area guidelines, Green Mask guidelines, the Final Work Area, The 4 Basic Techniques, guideline images to download, and a final form. Finishing it shows 'Rules acknowledged! Access unlocked.'",
+    "how_to": [
+      "Go through each step and watch the videos",
+      "Click Download Required to save the guideline images",
+      "Answer the final form, typing the rules exactly as shown",
+      "Submit to unlock Active Projects and Task Summary"
+    ],
+    "conditions": "Typed answers must match exactly, including capitalization, punctuation and spelling. 'Reset Progress' starts over, and 'Review Rules & Guidelines' reopens it later.",
+    "keywords": [
+      "error sa rules",
+      "guidelines",
+      "punctuation",
+      "r&g",
+      "rule 2",
+      "rules",
+      "rules and guidelines",
+      "spacing",
+      "type rule"
+    ],
+    "source": "components/Project/RulesTab.tsx"
+  },
+  {
+    "id": "KB-023",
+    "category": "tasks",
+    "topic": "Work area rules (Red Grid and Green Mask)",
+    "where": "Rules and Guidelines > Task Area / Green Mask / Final Work Area",
+    "what_it_is": "Only label inside the big red grid (the Task Area). Don't label buildings touching the left and upper lines; do label buildings touching the right and bottom lines. Show the Green Mask and label buildings inside or touching it within the Task Area. Red Grid plus Green Mask is the final work area.",
+    "how_to": [
+      "Find the red grid of the task",
+      "Turn on the Green Mask",
+      "Label only buildings that are in the red grid and inside or touching the green mask"
+    ],
+    "conditions": "Don't label if there is a red grid but no green mask, or a green mask outside the red grid. Houses inside a yellow outline don't need labeling.",
+    "keywords": [
+      "anong ila label",
+      "green mask",
+      "grid",
+      "red grid",
+      "saan mag label",
+      "task area",
+      "work area",
+      "yellow outline"
+    ],
+    "source": "components/Project/RulesTab.tsx"
+  },
+  {
+    "id": "KB-024",
+    "category": "tasks",
+    "topic": "Key labeling rules",
+    "where": "Rules and Guidelines > final form",
+    "what_it_is": "The core rules members agree to: never submit or autopass unedited or unreviewed tasks; draw and cut straight lines as much as possible; the Golden Rule is to review the whole task and repair all errors, including comments, always; no low-quality tasks; not following the rules can mean zero salary.",
+    "how_to": [
+      "Review the whole task from the first grid to the last",
+      "Fix every error and every checker comment before submitting"
+    ],
+    "conditions": "Xfnite only pays for correctly completed work.",
+    "keywords": [
+      "auto pass",
+      "autopass",
+      "golden rule",
+      "low quality",
+      "quality",
+      "rules",
+      "zero salary"
+    ],
+    "source": "components/Project/RulesTab.tsx"
+  },
+  {
+    "id": "KB-025",
+    "category": "tasks",
+    "topic": "Landcover labeling tips",
+    "where": "Projects > Active Projects > Important Guidelines",
+    "what_it_is": "Tips for landcover work: turn on the 3rd product type for road and road-connected features and keep road edits minimal; use group category and right-click to change categories quickly; learn how to close a region properly; no need to edit nature features; learn each topology error and the tool that fixes it; fix your own errors and add comments before reporting a neighbor; tree canopy connection errors are fixed in your own task, not reported.",
+    "how_to": [
+      "Read Important Guidelines in Active Projects",
+      "Apply the tips while labeling"
+    ],
+    "conditions": "These apply to Landcover projects.",
+    "keywords": [
+      "category",
+      "land cover",
+      "landcover",
+      "neighbor",
+      "report",
+      "road",
+      "tips",
+      "topology",
+      "tree canopy"
+    ],
+    "source": "components/Project/ActiveProjectsTab.tsx; components/Project/RulesTab.tsx"
+  },
+  {
+    "id": "KB-026",
+    "category": "training",
+    "topic": "After Rules and Guidelines: Hands-On Training Completed",
+    "where": "Projects > Rules and Guidelines (after finishing)",
+    "what_it_is": "A congratulations screen that confirms the member can now work on Xfnite projects. Some projects need extra specialized training first (3D Matching, Landcover, Transportation); others only need the Hands-On Training. It also lists the Three Qualities of a Challenger: Determination, Initiative, Growth.",
+    "how_to": [
+      "Click Start Journey",
+      "Check which projects need specialized training"
+    ],
+    "conditions": "Team Managers guide members through project-specific training when needed.",
+    "keywords": [
+      "congratulations",
+      "hands on completed",
+      "start journey",
+      "tapos na rules",
+      "what next after rules"
+    ],
+    "source": "components/Project/RulesTab.tsx"
+  },
+  {
+    "id": "KB-027",
+    "category": "training",
+    "topic": "Training table (specialized trainings)",
+    "where": "Projects > Active Projects > Training (also /project/training)",
+    "what_it_is": "Lists each training with Project ID, Name, Project Status (Running or Closed), Training Status, Passed Task, Total Task and actions. Training Status can be Passed, Ongoing, Unregistered, Paused or Closed.",
+    "how_to": [
+      "Click Register to start a training (Reopen if it was paused)",
+      "Open Ginger and download the training tasks",
+      "Click Pause to pause it",
+      "Click Guides for the training materials"
+    ],
+    "conditions": "Only one training can be active at a time; other buttons are disabled with 'Another training is currently active'. Trainings marked Closed cannot be started. Standard Building has no button.",
+    "keywords": [
+      "another training is currently active",
+      "closed",
+      "disabled button",
+      "pause",
+      "paused",
+      "register training",
+      "reopen",
+      "training",
+      "unregistered"
+    ],
+    "source": "components/Project/ActiveProjectsTab.tsx; app/(dashboard)/project/training/page.tsx"
+  },
+  {
+    "id": "KB-028",
+    "category": "training",
+    "topic": "Starting a specialized training",
+    "where": "Projects > Active Projects > Training",
+    "what_it_is": "How to begin Landcover, Transportation or Roof training. After clicking Register, a 'Training Unlocked' message confirms the account is being registered for that training.",
+    "how_to": [
+      "Click Register (or Reopen) on the training",
+      "Read the training guide that pops up",
+      "Open Ginger and download the training tasks",
+      "Complete all training tasks and submit them for review"
+    ],
+    "conditions": "Checkers usually review training tasks within 1 to 3 days, sometimes within a few hours. To switch trainings, pause the current one first.",
+    "keywords": [
+      "gaano katagal checking",
+      "paano mag start training",
+      "register training",
+      "review time",
+      "start training",
+      "training unlocked"
+    ],
+    "source": "components/Project/ActiveProjectsTab.tsx"
+  },
+  {
+    "id": "KB-029",
+    "category": "training",
+    "topic": "Landcover Training",
+    "where": "Projects > Active Projects > Training > Landcover",
+    "what_it_is": "Video-based training for landcover labeling: common tools, drawing overpasses, connecting to neighbors, fixing topology errors, tutorials for training tasks 1 to 18, driveways and parkings, and man-made stage 2.",
+    "how_to": [
+      "Click Register on Landcover Training",
+      "Watch the instructional videos",
+      "Open 2D Ginger and download the Landcover training tasks"
+    ],
+    "conditions": "Uses the 2D Ginger software.",
+    "keywords": [
+      "land cover",
+      "landcover",
+      "landcover training",
+      "lc",
+      "overpass",
+      "topology"
+    ],
+    "source": "components/Project/LandCoverTrainingModal.tsx"
+  },
+  {
+    "id": "KB-030",
+    "category": "training",
+    "topic": "Transportation Training",
+    "where": "Projects > Active Projects > Training > Transportation",
+    "what_it_is": "A more challenging training with a Training Guide (Google Drive) and an Answer Key to study first.",
+    "how_to": [
+      "Click Register on Transportation Training",
+      "Read the Training Guide",
+      "Review the Answer Key",
+      "Click Start Training, then open 2D Ginger and download the tasks"
+    ],
+    "conditions": "Only 5 major-error pushbacks are allowed during this training. A pushback is when a Checker returns a task because of significant mistakes.",
+    "keywords": [
+      "major error",
+      "pushback limit",
+      "transpo",
+      "transport",
+      "transportation",
+      "transportation training"
+    ],
+    "source": "components/Project/TransportationTrainingModal.tsx"
+  },
+  {
+    "id": "KB-031",
+    "category": "training",
+    "topic": "Roof Training (3D Roof)",
+    "where": "Projects > Active Projects > Training > Roof",
+    "what_it_is": "High-precision 3D roof training with a Training Guide folder, a 3D Roof Errors guide for common errors and crashes, and the Ginger software package for roof training.",
+    "how_to": [
+      "Click Register on Roof Training",
+      "Open the Training Guide and the 3D Roof Errors guide",
+      "Download the roof Ginger software",
+      "Click Start Training, then download the training tasks"
+    ],
+    "conditions": "Uses the 3D Ginger software. Roof and 3D Match trainings may be temporarily disabled at times.",
+    "keywords": [
+      "3d match",
+      "3d roof",
+      "3dr",
+      "crash",
+      "fatal crash",
+      "roof",
+      "roof training"
+    ],
+    "source": "components/Project/RoofTrainingModal.tsx; components/Quests/MainQuest/MainQuests.tsx"
+  },
+  {
+    "id": "KB-032",
+    "category": "training",
+    "topic": "Guides button (training library)",
+    "where": "Projects > Active Projects > Training > Guides",
+    "what_it_is": "Opens the training library for that training: searchable videos, the Training Guide, the Answer Key, and for roof, the 3D Roof Errors guide and software.",
+    "how_to": [
+      "Click Guides beside the training",
+      "Search or open the material needed"
+    ],
+    "conditions": "Available for Landcover, Transportation and Roof trainings.",
+    "keywords": [
+      "guide",
+      "guides",
+      "library",
+      "refresher",
+      "training materials",
+      "videos"
+    ],
+    "source": "components/Project/GuidesLibraryModal.tsx"
+  },
+  {
+    "id": "KB-033",
+    "category": "training",
+    "topic": "Certification for live projects",
+    "where": "Projects > Active Projects",
+    "what_it_is": "After passing both Landcover Training and Transportation Training, a 'Certification Completed!' message confirms eligibility to register for live projects.",
+    "how_to": [
+      "Pass Landcover Training",
+      "Pass Transportation Training",
+      "Click Start Active Projects"
+    ],
+    "conditions": "If the wait is long, contact the Team Manager or post in the Community Chat so the Judgers can verify the account.",
+    "keywords": [
+      "certification",
+      "certified",
+      "eligible",
+      "live projects",
+      "passed landcover and transpo"
+    ],
+    "source": "components/Project/ActiveProjectsTab.tsx"
+  },
+  {
+    "id": "KB-034",
+    "category": "tasks",
+    "topic": "Account Under Verification",
+    "where": "Projects > Active Projects",
+    "what_it_is": "Shown when Landcover, Transportation and Roof are passed but the account has no group or team yet. Judgers verify the account, then assign a Checker Guild.",
+    "how_to": [
+      "Wait for the Judgers to verify the account",
+      "Join the assigned guild chat",
+      "Connect with the Checker Guild Leader"
+    ],
+    "conditions": "If it takes a while, contact the Team Manager or post in the Community Chat.",
+    "keywords": [
+      "checker guild",
+      "guild",
+      "no group",
+      "no team",
+      "under verification",
+      "verification",
+      "waiting",
+      "walang team"
+    ],
+    "source": "components/Project/ActiveProjectsTab.tsx"
+  },
+  {
+    "id": "KB-035",
+    "category": "tasks",
+    "topic": "Registering for a live project",
+    "where": "Projects > Active Projects",
+    "what_it_is": "The list of active live projects with Project ID, Name, Status, Started Date, Task Num, Registered? and an action button.",
+    "how_to": [
+      "Find the project in Active Projects",
+      "Click Register (Register Project)",
+      "Wait for the 'Registration Successful!' message",
+      "Open Ginger and start taking tasks"
+    ],
+    "conditions": "Some live projects require a specialized training first. The Dungeon Coordinator completes the registration.",
+    "keywords": [
+      "active projects",
+      "live project",
+      "live task",
+      "paano mag live task",
+      "register project",
+      "registered",
+      "walang project"
+    ],
+    "source": "components/Project/ActiveProjectsTab.tsx"
+  },
+  {
+    "id": "KB-036",
+    "category": "tasks",
+    "topic": "Performance Query",
+    "where": "Projects > Performance Query",
+    "what_it_is": "Shows work speed per project: Avg Task Pace (minutes per task), Overall Avg Speed (features per hour), Work Time, Tasks and Features, with Today, Yesterday, Daily and All-Time views. Pace labels range from Slowest Pace, Lagging Behind and Below Standard to Steady Pace, Excellent Speed and Unmatched Speed.",
+    "how_to": [
+      "Open Performance Query",
+      "Pick the time range",
+      "Use Show Previous Projects to see older projects"
+    ],
+    "conditions": "Numbers update as the system records work time; recently done tasks may take time to appear.",
+    "keywords": [
+      "f/hr",
+      "features per hour",
+      "hindi nare record",
+      "pace",
+      "performance",
+      "performance query",
+      "query",
+      "speed",
+      "worktime"
+    ],
+    "source": "components/Project/PerformanceQueryTab.tsx"
+  },
+  {
+    "id": "KB-037",
+    "category": "tasks",
+    "topic": "Overall Task Summary",
+    "where": "Projects > Overall Task Summary",
+    "what_it_is": "Statistics for a selected project: task completion, finished features, project metadata, and how many tasks are in each stage (Initialized, Labeler Editing, Labeler Submit, Checker Editing, Checker Submit, Checker Pushed Back, Judger Editing, Reviewer Editing, Finished).",
+    "how_to": [
+      "Open Overall Task Summary",
+      "Select an annotation project",
+      "Read the Task State Distribution"
+    ],
+    "conditions": "Locked until Rules & Guidelines are acknowledged.",
+    "keywords": [
+      "finished",
+      "pushed back",
+      "statistics",
+      "summary",
+      "task state",
+      "task summary"
+    ],
+    "source": "components/Project/TaskSummaryTab.tsx"
+  },
+  {
+    "id": "KB-038",
+    "category": "tasks",
+    "topic": "Performance and low-hours warnings",
+    "where": "Pop-up after login",
+    "what_it_is": "Pop-ups that warn when speed is below the required pace in some projects (Performance Alerts) or when last week's work hours were lower than expected (Low Work Hours Warning).",
+    "how_to": [
+      "Read the warning",
+      "Tick the acknowledgment box",
+      "Log more consistent hours or improve pace while keeping quality"
+    ],
+    "conditions": "These are reminders, not penalties by themselves.",
+    "keywords": [
+      "below pace",
+      "low hours",
+      "low work hours",
+      "performance alert",
+      "pop up warning",
+      "warning"
+    ],
+    "source": "components/GlobalPerformanceAnnouncements.tsx; components/GlobalLowHoursAnnouncements.tsx"
+  },
+  {
+    "id": "KB-039",
+    "category": "pay",
+    "topic": "Wallet overview",
+    "where": "Sidebar > Wallet > Wallet > Overview",
+    "what_it_is": "Shows the Final Payment (current estimated salary), the Withdraw button, and Payout History. Some roles can click the Final Payment card to see the computation details.",
+    "how_to": [
+      "Open Wallet from the sidebar",
+      "Check Final Payment and Payout History on the Overview tab"
+    ],
+    "conditions": "The Wallet is locked until Standard Building is passed.",
+    "keywords": [
+      "computation",
+      "earnings",
+      "final payment",
+      "saan makikita sahod",
+      "sahod",
+      "salary",
+      "wallet"
+    ],
+    "source": "app/(dashboard)/wallet/page.tsx; wallet/layout.tsx"
+  },
+  {
+    "id": "KB-040",
+    "category": "pay",
+    "topic": "How to withdraw",
+    "where": "Wallet > Overview > Withdraw",
+    "what_it_is": "Withdrawals send the balance to the saved payment method. A 6-digit OTP sent by email confirms each withdrawal.",
+    "how_to": [
+      "Set up a payment method first",
+      "Click Withdraw",
+      "Review the Withdraw Funds details",
+      "Enter the 6-digit OTP sent to the email",
+      "Confirm; the request is received and processed",
+      "Track it in Payout History"
+    ],
+    "conditions": "An OTP can't be requested again until the resend timer ends. Check the spam or promotions folder if the OTP doesn't arrive.",
+    "keywords": [
+      "cash out",
+      "how to withdraw",
+      "mag withdraw",
+      "otp",
+      "paano mag withdraw",
+      "withdraw",
+      "withdrawal"
+    ],
+    "source": "app/(dashboard)/wallet/page.tsx"
+  },
+  {
+    "id": "KB-041",
+    "category": "pay",
+    "topic": "Why Withdraw is disabled",
+    "where": "Wallet > Overview",
+    "what_it_is": "The Withdraw button is disabled when no payment method is set ('Please set a payment method first'), when the balance hasn't reached the minimum withdrawal amount, or when the salary is still Processing.",
+    "how_to": [
+      "Make sure a payment method is saved",
+      "Keep working until the balance reaches the minimum",
+      "Wait for the next cut-off if the salary shows Processing"
+    ],
+    "conditions": "Other messages: 'Withdrawals are temporarily disabled' (system-wide pause), 'Admin temporarily disabled withdrawal for your role' (role pause), 'Status does not allow withdrawal' (payout status not claimable yet).",
+    "keywords": [
+      "cant withdraw",
+      "di ma withdraw",
+      "grayed",
+      "hindi ma withdraw",
+      "minimum",
+      "withdraw button",
+      "withdraw disabled"
+    ],
+    "source": "app/(dashboard)/wallet/page.tsx; lib/withdrawEligibility.ts"
+  },
+  {
+    "id": "KB-042",
+    "category": "pay",
+    "topic": "Final Payment shows Processing",
+    "where": "Wallet > Overview > Final Payment",
+    "what_it_is": "The salary shows 'Processing... Please wait for next cut-off' when the wallet balance hasn't reached the minimum needed to display it, or when admins have salaries on hold for a role. Earnings are not lost; they carry over.",
+    "how_to": [
+      "Keep doing live tasks to grow the balance",
+      "Wait for the next cut-off"
+    ],
+    "conditions": "When on hold by role, a queue shows how many people are ahead and an estimated wait. Very new accounts may also see their salary hidden at first.",
+    "keywords": [
+      "di makita sahod",
+      "hidden salary",
+      "naka processing",
+      "people ahead of you",
+      "please wait for next cut-off",
+      "processing",
+      "queue"
+    ],
+    "source": "app/(dashboard)/wallet/page.tsx; wallet/restrict/page.tsx"
+  },
+  {
+    "id": "KB-043",
+    "category": "pay",
+    "topic": "Payout History and statuses",
+    "where": "Wallet > Overview > Payout History",
+    "what_it_is": "Lists past payouts with date, Total Payout and Status. 'Sent' means it was sent to the payment method. A queue position means it is still being processed. 'Stopped, Please fix issue first.' means there is a payout problem.",
+    "how_to": [
+      "Scroll to Payout History",
+      "Check each payout's status"
+    ],
+    "conditions": "Problem statuses include: Invalid/Blurred QR, Update MOP, Change MOP, payment name doesn't match the account holder or immediate family, GCash Error, No MOP. All of them are fixed by updating the payment method.",
+    "keywords": [
+      "blurred qr",
+      "fix issue",
+      "gcash error",
+      "invalid qr",
+      "mop",
+      "payout history",
+      "sent",
+      "stopped",
+      "update mop"
+    ],
+    "source": "app/(dashboard)/wallet/page.tsx"
+  },
+  {
+    "id": "KB-044",
+    "category": "pay",
+    "topic": "Setting up a payment method",
+    "where": "Wallet > Payment Method",
+    "what_it_is": "Where the payout account is saved. Providers: GCash, Maya, Binance, PayPal, BPI, BDO, Security Bank, GoTyme, Landbank, Metrobank, or Other Bank.",
+    "how_to": [
+      "Open Wallet > Payment Method and click Add (or Change) Payment Method",
+      "Select the payment provider",
+      "Enter First Name, Last Name and the account number twice",
+      "Upload a clear payment QR code (required)",
+      "Enter the 6-digit OTP sent to the email",
+      "Confirm the details and save"
+    ],
+    "conditions": "The name on the payment method must match the account holder or an immediate family member. The QR code is required. Check spam or promotions if the OTP is missing; expired OTPs need a new request.",
+    "keywords": [
+      "account number",
+      "bank",
+      "change gcash",
+      "gcash",
+      "lagay gcash",
+      "maya",
+      "mop",
+      "otp",
+      "payment method",
+      "qr code"
+    ],
+    "source": "app/(dashboard)/wallet/payment-method/page.tsx; app/components/ConfirmPaymentModal.tsx"
+  },
+  {
+    "id": "KB-045",
+    "category": "pay",
+    "topic": "Payment name mismatch (Action Required)",
+    "where": "Pop-up: Action Required",
+    "what_it_is": "Shown when the payment method's last name doesn't match the account's last name. Until it's fixed, only User Settings and the Wallet can be opened.",
+    "how_to": [
+      "Click Update Wallet Payment and correct the payment details",
+      "Or click Update Account Settings if the account name is wrong",
+      "Save so both last names match"
+    ],
+    "conditions": "A similar walkthrough appears when the QR image or payment method is missing.",
+    "keywords": [
+      "action required",
+      "hindi match",
+      "last name",
+      "name mismatch",
+      "update payment",
+      "walkthrough"
+    ],
+    "source": "components/Wallet/WalletWalkthroughProvider.tsx"
+  },
+  {
+    "id": "KB-046",
+    "category": "pay",
+    "topic": "Loyalty Points (LXP)",
+    "where": "Sidebar > Wallet > Loyalty Points",
+    "what_it_is": "LXP is a loyalty balance earned from quests. The page shows Available Loyalty Balance, Rank Status, Next Rank, Total Accumulated and Daily Quests Completed. LXP unlocks custom features and rewards.",
+    "how_to": [
+      "Complete daily quests to earn LXP",
+      "Check progress on the Loyalty Points page"
+    ],
+    "conditions": "LXP is separate from salary.",
+    "keywords": [
+      "loyalty",
+      "loyalty points",
+      "lxp",
+      "points",
+      "rank",
+      "rewards"
+    ],
+    "source": "app/(dashboard)/wallet/loyalty-points/page.tsx"
+  },
+  {
+    "id": "KB-047",
+    "category": "pay",
+    "topic": "Refer and Earn",
+    "where": "Sidebar > Refer & Earn (Invite a Challenger)",
+    "what_it_is": "Members can refer friends with their referral link and earn 10% of each referral's payout, capped at PHP 1,000 per referral.",
+    "how_to": [
+      "Open Refer & Earn in the sidebar",
+      "Click Copy Referral Link",
+      "Share it with friends who want to join"
+    ],
+    "conditions": "Friends Recruited shows how many joined through the link.",
+    "keywords": [
+      "invite",
+      "recruit",
+      "refer",
+      "refer and earn",
+      "referral",
+      "referral link"
+    ],
+    "source": "app/components/sidebar.tsx"
+  },
+  {
+    "id": "KB-048",
+    "category": "pay",
+    "topic": "Team Payout",
+    "where": "Wallet > Team Payout",
+    "what_it_is": "For team leaders: estimated salaries and payout history of team members, with hours, benchmark, raw amount, referral fee, platform fee, processing fee, unclaimed amount and final payment.",
+    "how_to": [
+      "Open Wallet > Team Payout",
+      "Filter or search team members"
+    ],
+    "conditions": "Only visible to roles that lead a team.",
+    "keywords": [
+      "members salary",
+      "team payout",
+      "team salary"
+    ],
+    "source": "app/(dashboard)/wallet/team/page.tsx"
+  },
+  {
+    "id": "KB-049",
+    "category": "support",
+    "topic": "Community chat and Facebook group",
+    "where": "Sidebar (Onboarding steps 1 and 2) and Account Info",
+    "what_it_is": "Members are asked to join the Facebook Messenger Community Chat for real-time project updates and answer keys, and the official Facebook Group. The Group Code must not be shared with others.",
+    "how_to": [
+      "Click Join Community Chat in the sidebar",
+      "Click Join Facebook Group and confirm membership",
+      "Proceed to Projects"
+    ],
+    "conditions": "Team chat links (Checker and Judger group chats) appear in Account Info once assigned.",
+    "keywords": [
+      "community chat",
+      "facebook group",
+      "gc",
+      "group chat",
+      "group code",
+      "join gc",
+      "messenger"
+    ],
+    "source": "app/components/sidebar.tsx; app/(dashboard)/account/page.tsx"
+  },
+  {
+    "id": "KB-050",
+    "category": "platform",
+    "topic": "In-site chat lounges",
+    "where": "Chat widget (bottom of the screen)",
+    "what_it_is": "Built-in chat with lounges by role: an applicants lounge, the Challengers lounge for passers, the OGXF lounge for veterans, and staff group chats. Messages support replies, editing, unsending and image attachments up to 10MB.",
+    "how_to": [
+      "Open the chat widget",
+      "Pick a lounge tab",
+      "Type a message or attach an image"
+    ],
+    "conditions": "The Challengers lounge unlocks after passing Standard Building. OGXF is only for OGXF members.",
+    "keywords": [
+      "challengers chat",
+      "chat",
+      "chat locked",
+      "lounge",
+      "message",
+      "ogxf"
+    ],
+    "source": "app/components/ChatWidget.tsx; config/permissions.ts"
+  },
+  {
+    "id": "KB-051",
+    "category": "platform",
+    "topic": "Quests",
+    "where": "Quest Log (Quest button)",
+    "what_it_is": "Main Quests follow the journey chapters (complete onboarding, finish Rules and Guidelines, take a live project, get assigned a guild, submit a first live task). Daily quests include Daily Check-In (log in daily), The Daily Bounty (submit 10 live tasks in Ginger), The Bards Ballad (add a song to the DJ Booth) and The 60-Minute Harmony (listen to the DJ Booth for 60 minutes). Side quests include referring a friend.",
+    "how_to": [
+      "Open the Quest Log",
+      "Do the listed actions",
+      "Earn LXP for completed quests"
+    ],
+    "conditions": "Some quest steps may show as temporarily disabled (e.g. 3D Match or Roof training).",
+    "keywords": [
+      "bounty",
+      "daily check in",
+      "daily quest",
+      "main quest",
+      "quest",
+      "quests",
+      "side quest",
+      "xp"
+    ],
+    "source": "components/Quests/MainQuest/MainQuests.tsx; config/quests.ts"
+  },
+  {
+    "id": "KB-052",
+    "category": "platform",
+    "topic": "DJ Booth",
+    "where": "DJ Booth widget",
+    "what_it_is": "A shared music player. Members can paste a YouTube link to add a song to the queue and listen together.",
+    "how_to": [
+      "Open the DJ Booth",
+      "Paste a YouTube link",
+      "Add it to the queue"
+    ],
+    "conditions": "Adding songs and listening time count toward daily quests.",
+    "keywords": [
+      "dj booth",
+      "jukebox",
+      "music",
+      "song",
+      "youtube"
+    ],
+    "source": "app/components/JukeboxWidget.tsx; config/quests.ts"
+  },
+  {
+    "id": "KB-053",
+    "category": "platform",
+    "topic": "Leaderboard",
+    "where": "Sidebar > Leaderboard",
+    "what_it_is": "Rankings with two categories: Top Challengers and Top Checkers. The member's own rank is highlighted.",
+    "how_to": [
+      "Open Leaderboard",
+      "Choose Top Challengers or Top Checkers"
+    ],
+    "conditions": "Unlocks after passing Standard Building and finishing Rules & Guidelines.",
+    "keywords": [
+      "leaderboard",
+      "rank",
+      "ranking",
+      "top challengers",
+      "top checkers"
+    ],
+    "source": "app/(dashboard)/ranking/layout.tsx; config/permissions.ts"
+  },
+  {
+    "id": "KB-054",
+    "category": "platform",
+    "topic": "Attendance check-in",
+    "where": "Sidebar > Attendance",
+    "what_it_is": "The Attendance Log for training meetings and project updates. Each session shows Date & Time, Meeting Title and Attended / Not Attended.",
+    "how_to": [
+      "Open Attendance",
+      "Click Check In on the meeting (or open the shared check-in link)",
+      "Enter the meeting passcode",
+      "Click Check In"
+    ],
+    "conditions": "Unlocks after passing Standard Building. Admins and judgers schedule the meetings.",
+    "keywords": [
+      "attend",
+      "attendance",
+      "check in",
+      "meeting",
+      "passcode"
+    ],
+    "source": "app/(dashboard)/attendance/page.tsx; attendance/checkin/[slug]/page.tsx"
+  },
+  {
+    "id": "KB-055",
+    "category": "account",
+    "topic": "User Settings",
+    "where": "Header > Settings",
+    "what_it_is": "Profile and security settings: First and Last Name, Facebook link, Phone Number, password change, Ginger Credentials (verified with the Ginger server when saved), and a Danger Zone to delete the account.",
+    "how_to": [
+      "Open Settings",
+      "Edit the fields",
+      "Confirm Profile Changes"
+    ],
+    "conditions": "A name change and a Facebook link change can each be requested only once and go to admin review. Payouts are not processed to fake, alias or placeholder names. Deleting the account is permanent and needs typing 'delete'.",
+    "keywords": [
+      "change name",
+      "change password",
+      "delete account",
+      "facebook link",
+      "ginger credentials",
+      "palitan pangalan",
+      "phone number",
+      "settings"
+    ],
+    "source": "app/(dashboard)/settings/page.tsx"
+  },
+  {
+    "id": "KB-056",
+    "category": "platform",
+    "topic": "Announcements and help",
+    "where": "Header (bell icon and menu)",
+    "what_it_is": "The header has Announcements (payout updates and notices; a red dot means new), Theme (light or dark), Settings, Help & Support, and Download Software. Profile change requests show their admin review result here.",
+    "how_to": [
+      "Click the bell to read announcements",
+      "Use the menu for Theme, Settings or Help & Support"
+    ],
+    "conditions": "Offline members see new announcements on their next login.",
+    "keywords": [
+      "announcement",
+      "announcements",
+      "bell",
+      "dark mode",
+      "help",
+      "notification",
+      "support",
+      "theme"
+    ],
+    "source": "app/components/header.tsx; wallet/restrict/page.tsx"
+  },
+  {
+    "id": "KB-057",
+    "category": "platform",
+    "topic": "Role titles on the platform",
+    "where": "Chat badges, rankings and profiles",
+    "what_it_is": "Roles have game-style titles: Novice (applicant), Challenger (labeler), Veteran (old labeler), Mentor (recruiter), Overseer (checker), Arbiter (judger), Grandmaster (admin).",
+    "how_to": [
+      "Check the badge beside a name in chat or rankings"
+    ],
+    "conditions": "The Dungeon Coordinator handles registrations for trainings and projects.",
+    "keywords": [
+      "arbiter",
+      "badge",
+      "challenger",
+      "grandmaster",
+      "mentor",
+      "novice",
+      "overseer",
+      "role",
+      "roles",
+      "title",
+      "veteran"
+    ],
+    "source": "config/permissions.ts; app/components/ChatWidget.tsx"
+  }
+]

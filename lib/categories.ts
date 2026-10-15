@@ -12,7 +12,8 @@ export type CategoryId =
   | "tech"
   | "account"
   | "tasks"
-  | "support";
+  | "support"
+  | "platform";
 
 type CategoryDef = {
   label: string;
@@ -95,6 +96,15 @@ export const CATEGORIES: Record<CategoryId, CategoryDef> = {
     keywords: [
       "contact", "cedrick", "recruiter", "tm", "team manager", "admin", "pm", "message", "fb group",
       "facebook", "gc", "group chat", "discord", "kanino", "sino kakausapin", "who to contact", "support",
+    ],
+  },
+  platform: {
+    label: "Platform Features & Navigation",
+    keywords: [
+      "quest", "quests", "daily quest", "lxp", "loyalty", "loyalty points", "leaderboard", "ranking", "attendance",
+      "check in", "dj booth", "jukebox", "lounge", "announcement", "notification", "bell", "sidebar", "locked",
+      "naka lock", "unlock", "badge", "challenger", "novice", "veteran", "overseer", "arbiter", "grandmaster",
+      "theme", "dark mode", "menu", "saan makikita", "nasaan",
     ],
   },
 };
