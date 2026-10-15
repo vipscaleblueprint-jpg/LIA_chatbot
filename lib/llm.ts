@@ -17,7 +17,7 @@ export async function askLLM(prompt: string): Promise<string> {
     if (!res.ok) {
       console.error("N8N ERROR STATUS:", res.status);
       console.error("N8N RAW ERROR:", text);
-      return "Ay sorry po, medyo nag-lag yung connection ko. Pwede pa-send ulit yung message niyo?";
+      return "Connection disconnected.";
     }
 
     try {
@@ -50,6 +50,6 @@ export async function askLLM(prompt: string): Promise<string> {
     }
   } catch (err) {
     console.error("LLM CRASH:", err);
-    return "Ay sorry po, medyo nag-lag yung connection ko. Pwede pa-send ulit yung message niyo?";
+    return "AI provider error.";
   }
 }

@@ -1,12 +1,9 @@
 import xfinite from "@/app/data/xfinite.json";
-import teamAnswers from "@/app/data/team_answers.json";
-import type { DetectedCategory } from "@/lib/categories";
 
 type KBItem = {
   title: string;
   content: string;
   source: string;
-  category?: string;
 };
 
 /* ================= BUILD KB ================= */
@@ -14,22 +11,6 @@ type KBItem = {
 const KB: KBItem[] = [
   ...xfinite.map(x => ({ ...x, source: "xfinite" })),
 ];
-
-// Real answers from recruiters / team in the group chats (question -> title, answer -> content)
-const TEAM_KB: (KBItem & { by: string })[] = teamAnswers.map(x => ({
-  title: x.question,
-  content: x.answer,
-  category: x.category,
-  by: x.by,
-  source: "team",
-}));
-
-const CATEGORY_BOOST = 30;
-
-function inCategory(item: KBItem, cat?: DetectedCategory) {
-  if (!cat || !item.category) return false;
-  return item.category === cat.primary || item.category === cat.secondary;
-}
 
 const MEANING: Record<string, string[]> = {
   pay: ["salary", "income", "earn", "earnings", "rate", "payout", "paid", "money", "cash", "payment", "kita", "sweldo", "pera", "sahod", "minimum"],
@@ -172,21 +153,20 @@ function scoreItem(item: KBItem, queryTokens: string[]) {
 
 /* ================= RETRIEVER ================= */
 
-export function retrieveContext(query: string, category?: DetectedCategory) {
+export function retrieveContext(query: string, forcedTopic?: string) {
   let tokens = meaningful(tokenize(query));
   tokens = expandMeaning(tokens);
 
-  const candidates = KB;
+  let candidates = KB;
 
   const ranked = candidates
     .map(item => ({
       item,
-      score: scoreItem(item, tokens) + (inCategory(item, category) ? CATEGORY_BOOST : 0)
+      score: scoreItem(item, tokens)
     }))
-    // Minimum relevance threshold; off-category items need a strong match of their own
-    .filter(r => r.score > 2 && (!category || inCategory(r.item, category) || r.score >= 60))
+    .filter(r => r.score > 2) // Minimum relevance threshold
     .sort((a, b) => b.score - a.score)
-    .slice(0, 5); // Retrieve top 5 items
+    .slice(0, 7); // Retrieve top 7 items
 
   if (!ranked.length) {
     // Fallback: If no matches, try loose token matching on title only
@@ -222,25 +202,6 @@ export function retrieveContext(query: string, category?: DetectedCategory) {
     context: ranked.map(r => `${r.item.title}: ${r.item.content}`).join("\n"),
     detectedTopic
   };
-}
-
-/* ================= TEAM ANSWER EXAMPLES ================= */
-
-// Real Q&As from the same category, so Lia answers the way the recruiters actually do
-export function retrieveTeamAnswers(query: string, category?: DetectedCategory, limit = 3) {
-  if (!category) return [];
-  const tokens = expandMeaning(meaningful(tokenize(query)));
-
-  return TEAM_KB
-    .filter(item => inCategory(item, category))
-    .map(item => ({
-      item,
-      score: scoreItem(item, tokens) + (item.category === category.primary ? 5 : 0)
-    }))
-    .filter(r => r.score > 10)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
-    .map(r => ({ question: r.item.title, answer: r.item.content, by: r.item.by }));
 }
 
 function expandMeaning(tokens: string[]) {
