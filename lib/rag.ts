@@ -1,6 +1,5 @@
 import xfinite from "@/app/data/xfinite.json";
 import teamAnswers from "@/app/data/team_answers.json";
-import platformGuide from "@/app/data/platform_guide.json";
 import type { DetectedCategory } from "@/lib/categories";
 
 type KBItem = {
@@ -8,30 +7,13 @@ type KBItem = {
   content: string;
   source: string;
   category?: string;
-  display?: string; // how the item is shown to the LLM, if different from "title: content"
 };
 
 /* ================= BUILD KB ================= */
 
-// How the current xfnite.cloud website works (pages, trainings, wallet rules).
-// Generated from the Xnite source by faq_data_cleaning/platform_scan/build_platform_guide.py
-const GUIDE_KB: KBItem[] = platformGuide.map(g => ({
-  // Keywords sit in the title so Taglish phrasings ("naka lock", "di ma withdraw") match
-  title: `${g.topic} ${g.keywords.join(" ")}`,
-  content: `${g.what_it_is} ${g.how_to.join(". ")}. ${g.conditions}`,
-  category: g.category,
-  source: "guide",
-  display:
-    `[Platform guide] ${g.topic} (Where: ${g.where}): ${g.what_it_is} ` +
-    `Steps: ${g.how_to.map((s, i) => `${i + 1}) ${s}`).join(" ")}. Notes: ${g.conditions}`,
-}));
-
 const KB: KBItem[] = [
   ...xfinite.map(x => ({ ...x, source: "xfinite" })),
-  ...GUIDE_KB,
 ];
-
-const showItem = (item: KBItem) => item.display ?? `${item.title}: ${item.content}`;
 
 // Real answers from recruiters / team in the group chats (question -> title, answer -> content)
 const TEAM_KB: (KBItem & { by: string })[] = teamAnswers.map(x => ({
@@ -204,7 +186,7 @@ export function retrieveContext(query: string, category?: DetectedCategory) {
     // Minimum relevance threshold; off-category items need a strong match of their own
     .filter(r => r.score > 2 && (!category || inCategory(r.item, category) || r.score >= 60))
     .sort((a, b) => b.score - a.score)
-    .slice(0, 3); // Top 3 only: longer prompts make the n8n model time out
+    .slice(0, 5); // Retrieve top 5 items
 
   if (!ranked.length) {
     // Fallback: If no matches, try loose token matching on title only
@@ -224,7 +206,7 @@ export function retrieveContext(query: string, category?: DetectedCategory) {
     if (!looseRanked.length) return { context: "NO_CONTEXT_FOUND" };
     
     return {
-      context: looseRanked.map(r => showItem(r.item)).join("\n"),
+      context: looseRanked.map(r => `${r.item.title}: ${r.item.content}`).join("\n"),
       detectedTopic: looseRanked[0].item.source
     };
   }
@@ -237,7 +219,7 @@ export function retrieveContext(query: string, category?: DetectedCategory) {
   const detectedTopic = Object.entries(topicCount).sort((a, b) => b[1] - a[1])[0]?.[0];
 
   return {
-    context: ranked.map(r => showItem(r.item)).join("\n"),
+    context: ranked.map(r => `${r.item.title}: ${r.item.content}`).join("\n"),
     detectedTopic
   };
 }
@@ -245,7 +227,7 @@ export function retrieveContext(query: string, category?: DetectedCategory) {
 /* ================= TEAM ANSWER EXAMPLES ================= */
 
 // Real Q&As from the same category, so Lia answers the way the recruiters actually do
-export function retrieveTeamAnswers(query: string, category?: DetectedCategory, limit = 2) {
+export function retrieveTeamAnswers(query: string, category?: DetectedCategory, limit = 3) {
   if (!category) return [];
   const tokens = expandMeaning(meaningful(tokenize(query)));
 
